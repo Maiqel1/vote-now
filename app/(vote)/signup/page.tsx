@@ -5,6 +5,8 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
+import Link from "next/link";
+import { Copy } from "lucide-react";
 
 enum SignUpStage {
   EMAIL,
@@ -19,6 +21,7 @@ export default function SignUpPage() {
   const [stage, setStage] = useState<SignUpStage>(SignUpStage.EMAIL);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
+  const [copySuccess, setCopySuccess] = useState(false);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -77,6 +80,16 @@ export default function SignUpPage() {
     }
   };
 
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(votingCode);
+      setCopySuccess(true);
+      setTimeout(() => setCopySuccess(false), 2000);
+    } catch (err) {
+      setError("Failed to copy to clipboard");
+    }
+  };
+
   return (
     <div className='container mx-auto max-w-md p-4'>
       <Card>
@@ -119,14 +132,31 @@ export default function SignUpPage() {
           )}
 
           {stage === SignUpStage.COMPLETE && (
-            <Alert>
-              <AlertDescription>
-                Registration successful! Your voting code is:{" "}
-                <strong>{votingCode}</strong>
-                <br />
-                Please save this code. You'll need it to cast your vote.
-              </AlertDescription>
-            </Alert>
+            <>
+              <Alert>
+                <AlertDescription className='flex flex-col gap-2'>
+                  <div>
+                    Registration successful! Your voting code is:{" "}
+                    <strong>{votingCode}</strong>
+                  </div>
+                  <Button
+                    onClick={copyToClipboard}
+                    variant='outline'
+                    className='w-full flex items-center justify-center gap-2'
+                  >
+                    <Copy size={16} />
+                    {copySuccess ? "Copied!" : "Copy Code"}
+                  </Button>
+                  <div className='text-sm text-gray-500'>
+                    Please save this code. You'll need it to cast your vote.
+                  </div>
+                </AlertDescription>
+              </Alert>
+
+              <Link href={"/vote"} onClick={copyToClipboard}>
+                <Button className='w-full mt-4'>Proceed to vote</Button>
+              </Link>
+            </>
           )}
 
           {error && (

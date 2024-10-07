@@ -1,10 +1,16 @@
-// app/api/send-otp/route.ts
 import { NextResponse } from "next/server";
-import { Resend } from "resend";
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
+import nodemailer from "nodemailer";
 
-const resend = new Resend(process.env.RESEND_API_KEY);
+// Create a transporter using Gmail
+const transporter = nodemailer.createTransport({
+  service: "gmail",
+  auth: {
+    user: process.env.GMAIL_USER,
+    pass: process.env.GMAIL_APP_PASSWORD,
+  },
+});
 
 function generateOTP() {
   return Math.floor(100000 + Math.random() * 900000).toString();
@@ -24,7 +30,7 @@ export async function POST(request: Request) {
     }
 
     const otp = generateOTP();
-    const expiryTime = Date.now() + 10 * 60 * 1000; // OTP expires in 10 minutes
+    const expiryTime = Date.now() + 10 * 60 * 1000;
 
     // Store OTP in Firestore
     await setDoc(doc(db, "otps", email), {
@@ -33,8 +39,9 @@ export async function POST(request: Request) {
       verified: false,
     });
 
-    await resend.emails.send({
-      from: "Voting System <onboarding@resend.dev>",
+    // Send email using nodemailer
+    await transporter.sendMail({
+      from: process.env.GMAIL_USER,
       to: email,
       subject: "Your OTP for Voter Registration",
       html: `
@@ -53,6 +60,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error("Error sending OTP:", error);
-    return NextResponse.json({ error: "Failed to send OTP" }, { status: 500 });
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : "Failed to send OTP" },
+      { status: 500 }
+    );
   }
 }

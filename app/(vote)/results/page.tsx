@@ -18,12 +18,12 @@ interface VoteResults {
 }
 
 const candidates: Candidate[] = [
-  { id: "1", name: "John Doe", position: "president" },
-  { id: "2", name: "Jane Smith", position: "president" },
-  { id: "3", name: "Alice Johnson", position: "vicePresident" },
-  { id: "4", name: "Bob Wilson", position: "vicePresident" },
-  { id: "5", name: "Charlie Brown", position: "secretary" },
-  { id: "6", name: "Diana Prince", position: "secretary" },
+  { id: "1", name: "Daniel", position: "president" },
+  { id: "2", name: "Tobi", position: "president" },
+  { id: "3", name: "Godsfavour", position: "vicePresident" },
+  { id: "4", name: "Afoma", position: "vicePresident" },
+  { id: "5", name: "Ini", position: "secretary" },
+  { id: "6", name: "...", position: "secretary" },
 ];
 
 export default function ResultsPage() {

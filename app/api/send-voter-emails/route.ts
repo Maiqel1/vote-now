@@ -38,8 +38,8 @@ export async function POST() {
             <h2 style="margin: 0; color: #0066cc;">${voter.code}</h2>
           </div>
           <p style="margin-top: 20px;">You will need this code to cast your vote.</p>
-          <p>Cast your vote here></p>
-          <a href="https://vote-now-shmc.vercel.app">https://vote-now-shmc.vercel.app</a>
+          <p>Cast your vote here</p>
+          <a href="https://vote-now-shmc.vercel.app">https://vote-now-shmc.vercel.app/vote</a>
           <p style="color: #666; font-size: 14px;">If you didn't register for voting, please ignore this email.</p>
         </div>
       `;

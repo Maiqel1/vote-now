@@ -44,6 +44,7 @@ export default function VotingPage() {
     vicePresident: "",
     secretary: "",
   });
+  const [userName, setUserName] = useState("");
 
   const handleVoteChange = (position: Position, value: string) => {
     setVotes((prev) => ({
@@ -65,6 +66,7 @@ export default function VotingPage() {
       }
 
       const voterData = voterDoc.data();
+      console.log(voterData);
 
       if (voterData.hasVoted) {
         setError("You have already voted");
@@ -76,6 +78,9 @@ export default function VotingPage() {
         return;
       }
 
+      const fullName = `${voterData.firstName} ${voterData.lastName}`;
+      setUserName(fullName);
+
       setIsVerified(true);
     } catch (err) {
       setError("Verification failed");
@@ -86,6 +91,14 @@ export default function VotingPage() {
   };
 
   const submitVote = async () => {
+    // Show confirmation dialog
+    const isConfirmed = window.confirm(
+      "Are you sure you want to submit your vote?"
+    );
+    if (!isConfirmed) {
+      return; // Exit if the user cancels the confirmation
+    }
+
     if (!votes.president || !votes.vicePresident || !votes.secretary) {
       setError("Please vote for all positions");
       return;
@@ -179,6 +192,7 @@ export default function VotingPage() {
     <div className='container mx-auto max-w-md p-4'>
       <Card>
         <CardHeader>
+          <CardTitle className='my-5'>Welcome, {userName}</CardTitle>
           <CardTitle>Cast Your Vote</CardTitle>
         </CardHeader>
         <CardContent>

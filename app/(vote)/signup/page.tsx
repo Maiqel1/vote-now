@@ -5,88 +5,51 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
-import Link from "next/link";
-import { Copy } from "lucide-react";
-
-enum SignUpStage {
-  EMAIL,
-  OTP,
-  COMPLETE,
-}
 
 export default function SignUpPage() {
-  const [email, setEmail] = useState("");
-  const [otp, setOtp] = useState("");
-  const [votingCode, setVotingCode] = useState("");
-  const [stage, setStage] = useState<SignUpStage>(SignUpStage.EMAIL);
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    phoneNumber: "",
+    email: "",
+  });
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [copySuccess, setCopySuccess] = useState(false);
+  const [success, setSuccess] = useState(false);
 
-  const handleEmailSubmit = async (e: React.FormEvent) => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError("");
 
     try {
-      const response = await fetch("/api/send-otp", {
+      const response = await fetch("/api/register-voter", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || "Failed to send OTP");
+        throw new Error(data.error || "Registration failed");
       }
 
-      setStage(SignUpStage.OTP);
+      setSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setIsLoading(false);
-    }
-  };
-
-  const handleOTPSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError("");
-
-    try {
-      const response = await fetch("/api/verify-otp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, otp }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.error || "Failed to verify OTP");
-      }
-
-      setVotingCode(data.votingCode);
-      setStage(SignUpStage.COMPLETE);
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const copyToClipboard = async () => {
-    try {
-      await navigator.clipboard.writeText(votingCode);
-      setCopySuccess(true);
-      setTimeout(() => setCopySuccess(false), 2000);
-    } catch (err) {
-      setError("Failed to copy to clipboard");
     }
   };
 
@@ -97,71 +60,50 @@ export default function SignUpPage() {
           <CardTitle>Voter Registration</CardTitle>
         </CardHeader>
         <CardContent>
-          {stage === SignUpStage.EMAIL && (
-            <form onSubmit={handleEmailSubmit} className='space-y-4'>
-              <div>
-                <Input
-                  type='email'
-                  placeholder='Enter your email'
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type='submit' disabled={isLoading} className='w-full'>
-                {isLoading ? "Sending OTP..." : "Get Verification Code"}
-              </Button>
-            </form>
-          )}
-
-          {stage === SignUpStage.OTP && (
-            <form onSubmit={handleOTPSubmit} className='space-y-4'>
-              <div>
-                <Input
-                  type='text'
-                  placeholder='Enter OTP'
-                  value={otp}
-                  onChange={(e) => setOtp(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type='submit' disabled={isLoading} className='w-full'>
-                {isLoading ? "Verifying..." : "Verify OTP"}
-              </Button>
-            </form>
-          )}
-
-          {stage === SignUpStage.COMPLETE && (
-            <>
-              <Alert>
-                <AlertDescription className='flex flex-col gap-2'>
-                  <div>
-                    Registration successful! Your voting code is:{" "}
-                    <strong>{votingCode}</strong>
-                  </div>
-                  <Button
-                    onClick={copyToClipboard}
-                    variant='outline'
-                    className='w-full flex items-center justify-center gap-2'
-                  >
-                    <Copy size={16} />
-                    {copySuccess ? "Copied!" : "Copy Code"}
-                  </Button>
-                  <div className='text-sm text-gray-500'>
-                    Please save this code. You'll need it to cast your vote.
-                  </div>
-                </AlertDescription>
-              </Alert>
-
-              <Link href={"/vote"} onClick={copyToClipboard}>
-                <Button className='w-full mt-4'>Proceed to vote</Button>
-              </Link>
-            </>
-          )}
+          <form onSubmit={handleSubmit} className='space-y-4'>
+            <Input
+              name='firstName'
+              placeholder='First Name'
+              value={formData.firstName}
+              onChange={handleInputChange}
+            />
+            <Input
+              name='lastName'
+              placeholder='Last Name'
+              value={formData.lastName}
+              onChange={handleInputChange}
+            />
+            <Input
+              name='phoneNumber'
+              placeholder='Phone Number'
+              value={formData.phoneNumber}
+              onChange={handleInputChange}
+            />
+            <Input
+              name='email'
+              type='email'
+              placeholder='Email'
+              value={formData.email}
+              onChange={handleInputChange}
+              required
+            />
+            <Button type='submit' disabled={isLoading} className='w-full'>
+              {isLoading ? "Registering..." : "Register"}
+            </Button>
+          </form>
 
           {error && (
             <Alert variant='destructive' className='mt-4'>
               <AlertDescription>{error}</AlertDescription>
+            </Alert>
+          )}
+
+          {success && (
+            <Alert className='mt-4'>
+              <AlertDescription>
+                Registration successful! You will receive your voting code by
+                email on the morning of the election.
+              </AlertDescription>
             </Alert>
           )}
         </CardContent>

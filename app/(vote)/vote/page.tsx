@@ -66,7 +66,7 @@ export default function VotingPage() {
       }
 
       const voterData = voterDoc.data();
-      console.log(voterData);
+      
 
       if (voterData.hasVoted) {
         setError("You have already voted");

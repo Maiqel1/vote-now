@@ -14,21 +14,15 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardContent, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 
-const ADMIN_PASSWORD = process.env.NEXT_PUBLIC_ADMIN_PASSWORD;
-
 export default function AdminPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
   const [stats, setStats] = useState({ total: 0, pending: 0 });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [enteredPassword, setEnteredPassword] = useState("");
 
   useEffect(() => {
-    if (isAuthenticated) {
-      fetchStats();
-    }
-  }, [isAuthenticated]);
+    fetchStats();
+  }, []);
 
   const fetchStats = async () => {
     try {
@@ -62,6 +56,7 @@ export default function AdminPage() {
       const response = await fetch("/api/send-voter-emails", {
         method: "POST",
       });
+
       const data = await response.json();
 
       if (!response.ok) {
@@ -76,43 +71,6 @@ export default function AdminPage() {
       setIsLoading(false);
     }
   };
-
-  const handlePasswordSubmit = () => {
-    if (enteredPassword === ADMIN_PASSWORD) {
-      setIsAuthenticated(true);
-    } else {
-      setError("Incorrect password");
-    }
-  };
-
-  if (!isAuthenticated) {
-    return (
-      <div className='container mx-auto max-w-md p-4'>
-        <Card>
-          <CardHeader>
-            <CardTitle>Admin Login</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <input
-              type='password'
-              placeholder='Enter Password'
-              value={enteredPassword}
-              onChange={(e) => setEnteredPassword(e.target.value)}
-              className='w-full mb-4 p-2 border'
-            />
-            <Button onClick={handlePasswordSubmit} className='w-full mb-5'>
-              Submit
-            </Button>
-            {error && (
-              <Alert variant='destructive'>
-                <AlertDescription>{error}</AlertDescription>
-              </Alert>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-    );
-  }
 
   return (
     <div className='container mx-auto max-w-md p-4'>

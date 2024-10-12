@@ -7,7 +7,7 @@ export default function Home() {
     <div className='container mx-auto max-w-md p-4'>
       <Card>
         <CardContent>
-          <Link href={"/signup"}>
+          <Link href={"/vote"}>
             <Button className='w-full mt-10'>Get Started</Button>
           </Link>
         </CardContent>

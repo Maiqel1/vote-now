@@ -18,6 +18,9 @@ const transporter = nodemailer.createTransport({
   },
 });
 
+// Helper function to add delay between operations
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 export async function POST() {
   try {
     const votersRef = collection(db, "voters");
@@ -25,9 +28,10 @@ export async function POST() {
     const querySnapshot = await getDocs(q);
 
     let sentCount = 0;
-    const emailPromises: any = [];
+    let errorCount = 0;
+    const errors: string[] = [];
 
-    querySnapshot.forEach((document) => {
+    for (const document of querySnapshot.docs) {
       const voter = document.data();
       const emailHTML = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -39,7 +43,7 @@ export async function POST() {
           </div>
           <p style="margin-top: 20px;">You will need this code to cast your vote.</p>
           <p>Cast your vote here</p>
-          <a href="https://vote-now-shmc.vercel.app">https://vote-now-shmc.vercel.app/vote</a>
+          <a href="https://vote-now-shmc.vercel.app/vote">https://vote-now-shmc.vercel.app/vote</a>
           <p style="color: #666; font-size: 14px;">If you didn't register for voting, please ignore this email.</p>
         </div>
       `;
@@ -51,24 +55,48 @@ export async function POST() {
         html: emailHTML,
       };
 
-      const emailPromise = transporter
-        .sendMail(mailOptions)
-        .then(() =>
-          updateDoc(doc(db, "voters", voter.email), { emailSent: true })
-        )
-        .then(() => sentCount++);
+      try {
+        await transporter.sendMail(mailOptions);
+        await updateDoc(doc(db, "voters", voter.email), { emailSent: true });
+        sentCount++;
 
-      emailPromises.push(emailPromise);
-    });
+        // Add a delay of 2 seconds between each email
+        await delay(2000);
+      } catch (error) {
+        console.error(`Failed to send email to ${voter.email}:`, error);
+        errorCount++;
+        errors.push(
+          `${voter.email}: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
 
-    await Promise.all(emailPromises);
+        // If we encounter too many errors, stop the process
+        if (errorCount > 5) {
+          throw new Error("Too many errors encountered, stopping the process.");
+        }
+      }
+    }
+
+    if (errorCount > 0) {
+      return NextResponse.json(
+        {
+          partialSuccess: true,
+          sentCount,
+          errorCount,
+          errors,
+        },
+        { status: 207 }
+      );
+    }
 
     return NextResponse.json({ success: true, sentCount });
   } catch (error) {
-    console.error("Error sending emails:", error);
+    console.error("Error in email sending process:", error);
     return NextResponse.json(
       {
         error: error instanceof Error ? error.message : "Failed to send emails",
+        sentCount: 0,
       },
       { status: 500 }
     );

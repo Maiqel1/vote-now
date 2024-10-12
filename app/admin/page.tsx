@@ -59,12 +59,18 @@ export default function AdminPage() {
 
       const data = await response.json();
 
-      if (!response.ok) {
+      if (response.status === 207) {
+        setSuccess(
+          `Partially successful: Sent ${data.sentCount} emails. ${data.errorCount} failed.`
+        );
+        setError(`Errors: ${data.errors.join("; ")}`);
+      } else if (response.ok) {
+        setSuccess(`Successfully sent ${data.sentCount} emails`);
+      } else {
         throw new Error(data.error || "Failed to send emails");
       }
 
-      setSuccess(`Successfully sent ${data.sentCount} emails`);
-      fetchStats(); // Refresh stats
+      await fetchStats(); // Refresh stats
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {

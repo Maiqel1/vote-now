@@ -1,4 +1,3 @@
-// app/api/verify-otp/route.ts
 import { NextResponse } from "next/server";
 import { doc, getDoc, setDoc, deleteDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
@@ -28,10 +27,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "OTP has expired" }, { status: 400 });
     }
 
-    // Generate voting code
     const votingCode = generateVotingCode();
 
-    // Store voter in Firestore
     await setDoc(doc(db, "voters", email), {
       email,
       code: votingCode,
@@ -39,7 +36,6 @@ export async function POST(request: Request) {
       createdAt: new Date().toISOString(),
     });
 
-    // Delete OTP document
     await deleteDoc(doc(db, "otps", email));
 
     return NextResponse.json({ success: true, votingCode });

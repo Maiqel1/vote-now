@@ -18,7 +18,6 @@ const transporter = nodemailer.createTransport({
   },
 });
 
-// Helper function to add delay between operations
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 export async function POST() {
@@ -71,7 +70,6 @@ export async function POST() {
           }`
         );
 
-        // If we encounter too many errors, stop the process
         if (errorCount > 5) {
           throw new Error("Too many errors encountered, stopping the process.");
         }

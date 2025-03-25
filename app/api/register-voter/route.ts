@@ -21,7 +21,6 @@ export async function POST(request: Request) {
 
     const votingCode = generateVotingCode();
 
-    // Store voter in Firestore
     await setDoc(doc(db, "voters", email), {
       email,
       firstName,

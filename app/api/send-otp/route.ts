@@ -3,7 +3,6 @@ import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import nodemailer from "nodemailer";
 
-// Create a transporter using Gmail
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
@@ -20,7 +19,6 @@ export async function POST(request: Request) {
   try {
     const { email } = await request.json();
 
-    // Check if email already exists and has voted
     const voterDoc = await getDoc(doc(db, "voters", email));
     if (voterDoc.exists() && voterDoc.data().hasVoted) {
       return NextResponse.json(
@@ -32,14 +30,12 @@ export async function POST(request: Request) {
     const otp = generateOTP();
     const expiryTime = Date.now() + 10 * 60 * 1000;
 
-    // Store OTP in Firestore
     await setDoc(doc(db, "otps", email), {
       otp,
       expiryTime,
       verified: false,
     });
 
-    // Send email using nodemailer
     await transporter.sendMail({
       from: process.env.GMAIL_USER,
       to: email,

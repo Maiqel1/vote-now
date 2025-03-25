@@ -18,11 +18,11 @@ interface VoteResults {
 }
 
 const candidates: Candidate[] = [
-  { id: "1", name: "Daniel Bassey Bassey", position: "president" },
-  { id: "2", name: "Naiyeju Oluwatobi", position: "president" },
-  { id: "3", name: "Godsfavour Okotie", position: "vicePresident" },
-  { id: "4", name: "Ene Afoma Lynda", position: "vicePresident" },
-  { id: "5", name: "Charles Iniobong Samuel", position: "secretary" },
+  { id: "1", name: "Ayodele Damilola David", position: "president" },
+  { id: "2", name: "Iklaki Christabel", position: "vicePresident" },
+  { id: "3", name: "Eluma Victoria", position: "vicePresident" },
+  { id: "4", name: "Ibekwe Stella Nnenna", position: "secretary" },
+  { id: "5", name: "Obiefoka Joy", position: "secretary" },
   // { id: "6", name: "...", position: "secretary" },
 ];
 

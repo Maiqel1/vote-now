@@ -18,11 +18,11 @@ interface VoteResults {
 }
 
 const candidates: Candidate[] = [
-  { id: "1", name: "Ayodele Damilola David", position: "president" },
-  { id: "2", name: "Iklaki Christabel", position: "vicePresident" },
-  { id: "3", name: "Eluma Victoria", position: "vicePresident" },
-  { id: "4", name: "Ibekwe Stella Nnenna", position: "secretary" },
-  { id: "5", name: "Obiefoka Joy", position: "secretary" },
+  { id: "1", name: "Comrade Joshua Osasenaga Aigbiremwen", position: "president" },
+  { id: "2", name: "Kayode Olanrewaju Jacob", position: "president" },
+  { id: "3", name: "Nwaoha Loveth", position: "vicePresident" },
+  { id: "4", name: "Akinfemisoye Melody Oluwafayokemi", position: "secretary" },
+  // { id: "5", name: "Obiefoka Joy", position: "secretary" },
   // { id: "6", name: "...", position: "secretary" },
 ];
 

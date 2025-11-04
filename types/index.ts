@@ -28,6 +28,7 @@ export interface VoterDocument {
   code: string;
   hasVoted: boolean;
   votedAt?: string;
+  votes?:Votes;
 }
 
 export interface VoteDocument {

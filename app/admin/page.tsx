@@ -8,6 +8,7 @@ import {
   getDocs,
   updateDoc,
   doc,
+  deleteDoc
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import { Button } from "@/components/ui/button";
@@ -78,6 +79,31 @@ export default function AdminPage() {
     }
   };
 
+  const clearVoters = async () => {
+  if (!confirm("Are you sure you want to delete ALL voters? This cannot be undone.")) return;
+
+  setIsLoading(true);
+  setError("");
+  setSuccess("");
+
+  try {
+    const votersRef = collection(db, "voters");
+    const snapshot = await getDocs(votersRef);
+    
+    const deletePromises = snapshot.docs.map((doc) => 
+      deleteDoc(doc.ref)
+    );
+    
+    await Promise.all(deletePromises);
+    setSuccess(`Successfully deleted ${snapshot.size} voters`);
+    await fetchStats(); // Refresh stats
+  } catch (err) {
+    setError(err instanceof Error ? err.message : "Failed to delete voters");
+  } finally {
+    setIsLoading(false);
+  }
+};
+
   return (
     <div className='container mx-auto max-w-md p-4'>
       <Card>
@@ -104,6 +130,15 @@ export default function AdminPage() {
             >
               {isLoading ? "Sending..." : "Send Voter Codes"}
             </Button>
+
+            <Button
+            onClick={clearVoters}
+            disabled={isLoading || stats.total === 0}
+            variant="destructive"
+            className="w-full"
+          >
+            {isLoading ? "Clearing..." : "Clear All Voters"}
+          </Button>
 
             {error && (
               <Alert variant='destructive'>

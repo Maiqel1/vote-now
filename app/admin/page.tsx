@@ -131,14 +131,14 @@ export default function AdminPage() {
               {isLoading ? "Sending..." : "Send Voter Codes"}
             </Button>
 
-            <Button
+            {/* <Button
             onClick={clearVoters}
             disabled={isLoading || stats.total === 0}
             variant="destructive"
             className="w-full"
           >
             {isLoading ? "Clearing..." : "Clear All Voters"}
-          </Button>
+          </Button> */}
 
             {error && (
               <Alert variant='destructive'>

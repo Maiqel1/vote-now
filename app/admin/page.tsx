@@ -125,8 +125,8 @@ export default function AdminPage() {
 
             <Button
               onClick={sendEmails}
-              // disabled={isLoading || stats.pending === 0}
-              disabled
+              disabled={isLoading || stats.pending === 0}
+              // disabled
               className='w-full'
             >
               {isLoading ? "Sending..." : "Send Voter Codes"}

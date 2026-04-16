@@ -41,7 +41,7 @@ export default function Home() {
       </div>
 
       {/* Main content */}
-      <div className="relative z-10 text-center max-w-3xl mx-auto">
+      <div className="relative z-10 text-center max-w-3xl">
         {/* Headline */}
         <h1 className="animate-slide-up delay-100 font-playfair font-black leading-[0.9] mb-8">
           <span className="block text-[clamp(4rem,12vw,8rem)] gradient-text">

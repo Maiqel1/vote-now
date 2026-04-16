@@ -299,6 +299,28 @@ export default function AdminPage() {
             </button>
           </div>
 
+          {/* Clear all voters */}
+          {/* <div className="flex items-center justify-between p-4 rounded-xl bg-red-500/8 border border-red-500/20">
+            <div className="min-w-0">
+              <div className="text-sm font-medium text-red-400 font-sans">
+                Clear All Voters
+              </div>
+              <div className="text-xs text-muted-foreground font-sans mt-0.5">
+                Permanently delete all voter registrations — cannot be undone
+              </div>
+            </div>
+            <button
+              onClick={clearVoters}
+              disabled={isLoading || stats.total === 0}
+              className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-red-500/15 hover:bg-red-500/25 text-red-400 text-xs font-semibold font-sans transition-all border border-red-500/25 disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/>
+              </svg>
+              Clear
+            </button>
+          </div> */}
+
           {/* View results */}
           <div className="flex items-center justify-between p-4 rounded-xl bg-secondary/60 border border-border">
             <div className="min-w-0">

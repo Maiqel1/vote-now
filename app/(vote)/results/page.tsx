@@ -74,7 +74,7 @@ function SkeletonBlock({ className }: { className?: string }) {
   return <div className={`skeleton ${className}`} />;
 }
 
-export default function ResultsPage() {
+function ResultsPage() {
   const [results, setResults] = useState<Record<Position, VoteResults>>({
     president: {},
     vicePresident: {},
@@ -169,14 +169,14 @@ export default function ResultsPage() {
         <div className="text-center mb-14 animate-slide-up">
           <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium tracking-widest uppercase mb-6">
             <span className="w-1.5 h-1.5 rounded-full bg-amber-400 inline-block" />
-            2025 Election Results
+            Election Results
           </div>
           <h1 className="font-playfair text-5xl md:text-6xl font-black text-foreground mb-4">
             The People<br />
             <span className="gradient-text">Have Spoken</span>
           </h1>
           <p className="text-muted-foreground font-sans text-base max-w-md mx-auto">
-            Final results from the 2025 elections. Every vote counted, every voice mattered.
+            Final results from the elections. Every vote counted, every voice mattered.
           </p>
         </div>
 
@@ -261,7 +261,6 @@ export default function ResultsPage() {
 
                         return (
                           <div key={candidate.id} className="space-y-2.5">
-                            {/* Candidate info row */}
                             <div className="flex items-center justify-between">
                               <div className="flex items-center gap-3 min-w-0">
                                 {/* Rank badge */}
@@ -343,3 +342,70 @@ export default function ResultsPage() {
     </main>
   );
 }
+
+function ComingSoon() {
+  return (
+    <main className="relative min-h-screen flex flex-col items-center justify-center px-6 overflow-hidden">
+      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full bg-amber-500/[0.04] blur-[120px] pointer-events-none" />
+      <div className="absolute bottom-0 right-0 w-[400px] h-[400px] rounded-full bg-blue-500/[0.03] blur-[80px] pointer-events-none" />
+
+      <div className="absolute top-0 left-0 right-0 flex items-center justify-between px-8 py-5">
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-7 h-7 rounded-lg bg-amber-500 flex items-center justify-center">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none">
+              <path d="M9 12L11 14L15 10M20.618 5.984A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622C17.176 19.29 21 14.591 21 9a12.02 12.02 0 00-.382-3.016z" stroke="hsl(224 45% 6%)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </div>
+          <span className="font-playfair text-sm font-semibold tracking-wide text-foreground/80 group-hover:text-foreground transition-colors">VoteNow</span>
+        </Link>
+      </div>
+
+      <div className="relative z-10 text-center max-w-xl mx-auto animate-slide-up">
+        <div className="flex items-center justify-center mb-10">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center">
+              <svg width="38" height="38" viewBox="0 0 24 24" fill="none" className="text-amber-400 animate-spin-slow">
+                <path d="M12 2v4M12 18v4M4.93 4.93l2.83 2.83M16.24 16.24l2.83 2.83M2 12h4M18 12h4M4.93 19.07l2.83-2.83M16.24 7.76l2.83-2.83" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round"/>
+              </svg>
+            </div>
+            <div className="absolute inset-0 rounded-full border border-amber-500/15 scale-125 animate-pulse-soft" />
+            <div className="absolute inset-0 rounded-full border border-amber-500/8 scale-150 animate-pulse-soft delay-300" />
+          </div>
+        </div>
+
+        <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-xs font-medium tracking-widest uppercase mb-6">
+          <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse-soft inline-block" />
+          Counting Votes
+        </div>
+
+        <h1 className="font-playfair text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+          Results Coming<br />
+          <span className="gradient-text">Very Soon</span>
+        </h1>
+
+        <p className="text-muted-foreground text-lg leading-relaxed mb-10 max-w-md mx-auto font-sans">
+          The election is underway. Results will be published here as soon as all votes have been counted.
+        </p>
+
+        <div className="glass rounded-2xl p-6 mb-10 text-left space-y-3">
+          <p className="text-xs font-medium text-muted-foreground tracking-widest uppercase font-sans mb-4">Positions Being Contested</p>
+          {(["President", "Vice President", "Secretary General", "Director of Sport", "Director of Socials"]).map((pos, i) => (
+            <div key={pos} className="flex items-center gap-3 animate-slide-up" style={{ animationDelay: `${(i + 3) * 0.1}s` }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-amber-500/50 flex-shrink-0" />
+              <span className="text-sm font-sans text-foreground/60">{pos}</span>
+              <div className="flex-1 h-px bg-border/50" />
+              <span className="text-xs font-sans text-muted-foreground/40">Pending</span>
+            </div>
+          ))}
+        </div>
+
+        <Link href="/" className="btn-ghost text-sm">← Back to Home</Link>
+      </div>
+
+      <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-amber-500/15 to-transparent" />
+    </main>
+  );
+}
+
+export default ComingSoon;
+// export default ResultsPage;

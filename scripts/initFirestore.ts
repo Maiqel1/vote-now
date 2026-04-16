@@ -17,17 +17,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-type Position = "president" | "vicePresident" | "secretary";
+type Position = "president" | "vicePresident" | "secretaryGeneral" | "directorOfSport" | "directorOfSocials";
 interface VoteDocument {
   [key: string]: number;
 }
 
 async function initializeFirestore() {
-  const positions: Position[] = ["president", "vicePresident", "secretary"];
+  const positions: Position[] = ["president", "vicePresident", "secretaryGeneral", "directorOfSport", "directorOfSocials"];
   const candidateIds: Record<Position, string[]> = {
     president: ["1", "2"],
-    vicePresident: ["3", "4"],
-    secretary: ["5", "6"],
+    vicePresident: ["3"],
+    secretaryGeneral: ["4"],
+    directorOfSport: ["5"],
+    directorOfSocials: ["6"],
   };
 
   try {

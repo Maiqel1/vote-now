@@ -249,7 +249,7 @@ export default function AdminPage() {
             <button
               onClick={sendEmails}
               // disabled
-              className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-amber-400 text-xs font-medium font-sans border border-amber-500/15"
+              className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500 text-amber-950 text-xs font-medium font-sans border border-amber-500/15"
             >
               <svg
                 width="13"

@@ -248,7 +248,7 @@ export default function AdminPage() {
             </div>
             <button
               onClick={sendEmails}
-              disabled
+              // disabled
               className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-500/20 text-amber-400/50 text-xs font-medium font-sans cursor-not-allowed border border-amber-500/15"
             >
               <svg

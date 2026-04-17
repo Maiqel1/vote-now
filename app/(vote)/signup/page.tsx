@@ -3,6 +3,8 @@
 import React, { useState } from "react";
 import Link from "next/link";
 
+const REGISTRATION_CLOSED = true;
+
 export default function SignUpPage() {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -63,7 +65,27 @@ export default function SignUpPage() {
       </div>
 
       <div className="relative z-10 w-full max-w-md">
-        {success ? (
+        {REGISTRATION_CLOSED ? (
+          /* Registration closed state */
+          <div className="text-center animate-slide-up">
+            <div className="flex items-center justify-center mb-8">
+              <div className="w-20 h-20 rounded-full bg-amber-500/10 border border-amber-500/25 flex items-center justify-center">
+                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-amber-400">
+                  <path d="M12 15v2m0-10v4m0 0a3 3 0 100 6 3 3 0 000-6zm0 0V9m-9 3a9 9 0 1018 0 9 9 0 00-18 0z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            </div>
+            <h2 className="font-playfair text-3xl font-bold text-foreground mb-3">
+              Registration Closed
+            </h2>
+            <p className="text-muted-foreground leading-relaxed mb-8 max-w-sm mx-auto font-sans">
+              Voter registration for this election has ended. If you already registered, check your email for your voting code.
+            </p>
+            <Link href="/" className="btn-ghost text-sm">← Back to Home</Link>
+          </div>
+        ) : success ? (
           /* Success state */
           <div className="text-center animate-slide-up">
             <div className="flex items-center justify-center mb-8">
@@ -228,3 +250,5 @@ export default function SignUpPage() {
     </main>
   );
 }
+
+

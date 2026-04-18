@@ -407,5 +407,5 @@ function ComingSoon() {
   );
 }
 
-export default ComingSoon;
-// export default ResultsPage;
+// export default ComingSoon;
+export default ResultsPage;

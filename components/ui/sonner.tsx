@@ -1,0 +1,18 @@
+"use client";
+
+import { Toaster as Sonner } from "sonner";
+
+export function Toaster() {
+  return (
+    <Sonner
+      theme="dark"
+      position="bottom-right"
+      toastOptions={{
+        classNames: {
+          toast: "!bg-card !border-border !text-foreground !rounded-xl",
+          description: "!text-muted-foreground",
+        },
+      }}
+    />
+  );
+}

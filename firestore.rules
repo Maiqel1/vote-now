@@ -1,0 +1,66 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+
+    function electionData(eid) {
+      return get(/databases/$(database)/documents/elections/$(eid)).data;
+    }
+
+    function isMember(eid) {
+      return signedIn() && request.auth.uid in electionData(eid).memberIds;
+    }
+
+    function resultsPublic(eid) {
+      let e = electionData(eid);
+      return e.status == 'published' && (
+        e.results.visibility == 'live'
+        || (e.results.visibility == 'afterClose' && request.time.toMillis() >= e.endsAt)
+        || (e.results.visibility == 'manual' && e.results.publishedAt != null)
+      );
+    }
+
+    match /elections/{eid} {
+      allow get: if signedIn() && request.auth.uid in resource.data.memberIds;
+      allow list: if signedIn() && request.auth.uid in resource.data.memberIds;
+      allow write: if false;
+
+      match /tallies/{shard} {
+        allow read: if isMember(eid) || resultsPublic(eid);
+        allow write: if false;
+      }
+
+      match /ballot/{docId} {
+        allow read: if isMember(eid);
+        allow write: if false;
+      }
+
+      match /voters/{voterId} {
+        allow read: if isMember(eid);
+        allow write: if false;
+      }
+
+      match /audit/{entryId} {
+        allow read: if isMember(eid);
+        allow write: if false;
+      }
+
+      match /{rest=**} {
+        allow read, write: if false;
+      }
+    }
+
+    match /votes/{position} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "projects": {
+    "production": "voting-app-4d1f7",
+    "staging": "voting-app-staging"
+  },
+  "targets": {},
+  "etags": {}
+}

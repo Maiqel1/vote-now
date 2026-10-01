@@ -219,3 +219,15 @@
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
+
+@media print {
+  body.printing-slips > *:not(.print-root) {
+    display: none !important;
+  }
+  body.printing-slips {
+    background: #fff !important;
+  }
+  body::after {
+    display: none !important;
+  }
+}

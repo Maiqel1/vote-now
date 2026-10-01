@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
 import { Playfair_Display, DM_Sans } from "next/font/google";
+import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
 const geistMono = localFont({
@@ -24,8 +25,10 @@ const dmSans = DM_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "Vote Now — Your Voice Matters",
-  description: "Cast your ballot. Shape the future. Secure, transparent, fair.",
+  metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
+  title: { default: "VoteNow · Secure online elections", template: "%s · VoteNow" },
+  description:
+    "Create an election, invite your voters and get results you can trust. Secret ballots, one vote per voter, live turnout.",
 };
 
 export default function RootLayout({
@@ -39,6 +42,7 @@ export default function RootLayout({
         className={`${playfair.variable} ${dmSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
+        <Toaster />
       </body>
     </html>
   );

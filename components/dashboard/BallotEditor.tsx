@@ -111,7 +111,7 @@ function CandidateEditor({
   }
 
   return (
-    <div className="rounded-xl border border-border/70 bg-secondary/20 p-4">
+    <div className="rounded-xl border border-border/70 bg-muted/50 p-4">
       <div className="flex gap-4">
         <div className="flex flex-col items-center gap-2">
           <button
@@ -129,7 +129,7 @@ function CandidateEditor({
             )}
           </button>
           {candidate.photoUrl && !locked && (
-            <button type="button" className="text-[10px] text-muted-foreground hover:text-red-400" onClick={() => onChange({ ...candidate, photoUrl: null })}>
+            <button type="button" className="text-[10px] text-muted-foreground hover:text-danger" onClick={() => onChange({ ...candidate, photoUrl: null })}>
               Remove
             </button>
           )}
@@ -204,7 +204,7 @@ function PositionEditor({
   const canAddCandidate = !locked && !(position.type === "yesno" && position.candidates.length >= 1);
 
   return (
-    <div className="glass rounded-2xl">
+    <div className="surface rounded-2xl">
       <div className="flex items-start gap-3 border-b border-border/60 p-5">
         <span className="mt-2.5 font-mono text-xs text-muted-foreground/60">{String(index + 1).padStart(2, "0")}</span>
         <div className="min-w-0 flex-1 space-y-3">
@@ -213,7 +213,7 @@ function PositionEditor({
             maxLength={100}
             value={position.title}
             disabled={locked}
-            className="font-playfair text-base font-semibold"
+            className="text-base font-semibold"
             onChange={(e) => onChange({ ...position, title: e.target.value })}
           />
           <Input
@@ -333,8 +333,8 @@ export function BallotEditor({ electionId, initial, locked }: { electionId: stri
       {locked && <Notice tone="info">The ballot is locked because voting has started. This protects the integrity of the election.</Notice>}
 
       {positions.length === 0 && (
-        <div className="glass rounded-2xl p-8 text-center">
-          <h3 className="mb-1 font-playfair text-xl font-bold">Build your ballot</h3>
+        <div className="surface rounded-2xl p-8 text-center">
+          <h3 className="mb-1 text-xl font-bold">Build your ballot</h3>
           <p className="mb-5 text-sm text-muted-foreground">Add each position people are voting for, then the candidates for each.</p>
           {!locked && <Button onClick={() => setPositions([newPosition()])}>+ Add first position</Button>}
         </div>
@@ -361,13 +361,13 @@ export function BallotEditor({ electionId, initial, locked }: { electionId: stri
       )}
 
       <div
-        className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/60"
-        style={{ background: "hsl(224 45% 6% / 0.92)", backdropFilter: "blur(16px)" }}
+        className="fixed bottom-0 left-0 right-0 z-30 border-t border-border/70 bg-background/80 backdrop-blur-xl"
+       
       >
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
           <span className="text-xs text-muted-foreground">
             {positions.length} of {FREE_PLAN.positionsPerElection} positions · {candidateCount} of {FREE_PLAN.candidatesPerElection} candidates
-            {dirty && <span className="ml-2 text-amber-400">· Unsaved changes</span>}
+            {dirty && <span className="ml-2 text-brand-strong">· Unsaved changes</span>}
           </span>
           <div className="flex gap-2">
             <Dialog onOpenChange={() => setPreview({})}>
@@ -378,7 +378,7 @@ export function BallotEditor({ electionId, initial, locked }: { electionId: stri
               </DialogTrigger>
               <DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle className="font-playfair text-xl">Ballot preview</DialogTitle>
+                  <DialogTitle className="text-xl">Ballot preview</DialogTitle>
                 </DialogHeader>
                 <BallotView
                   positions={positions.filter((p) => p.title)}

@@ -81,7 +81,7 @@ function SignupForm() {
       footer={
         <>
           Already have an account?{" "}
-          <Link href="/login" className="text-amber-400 hover:text-amber-300">
+          <Link href="/login" className="text-brand-strong hover:text-brand-strong">
             Log in
           </Link>
         </>

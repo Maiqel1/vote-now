@@ -13,7 +13,7 @@ const VARIANTS = {
 export function StatusBadge({ status }: { status: EffectiveStatus }) {
   return (
     <Badge variant={VARIANTS[status]}>
-      {status === "open" && <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-emerald-400" />}
+      {status === "open" && <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-success" />}
       {STATUS_LABELS[status]}
     </Badge>
   );

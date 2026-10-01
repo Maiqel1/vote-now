@@ -1,15 +1,16 @@
 "use client";
 
+import { GlowCard } from "@/components/ui/glow-card";
 import { Progress } from "@/components/ui/progress";
 import { useLiveTally } from "@/lib/client/use-live-tally";
 import type { TallyShard } from "@/lib/types";
 
 function Stat({ label, value, accent }: { label: string; value: React.ReactNode; accent?: boolean }) {
   return (
-    <div className="glass rounded-2xl p-5">
-      <div className={accent ? "stat-number text-4xl" : "font-playfair text-4xl font-bold leading-none text-foreground"}>{value}</div>
-      <div className="mt-2 text-xs tracking-wide text-muted-foreground">{label}</div>
-    </div>
+    <GlowCard innerClassName="p-5">
+      <div className={accent ? "stat text-brand-strong" : "stat text-foreground"}>{value}</div>
+      <div className="mt-2 text-xs text-muted-foreground">{label}</div>
+    </GlowCard>
   );
 }
 
@@ -38,14 +39,14 @@ export function TurnoutPanel({
         <Stat label="Voted" value={voted.toLocaleString()} accent />
         <Stat label="Turnout" value={`${turnout.toFixed(turnout > 0 && turnout < 10 ? 1 : 0)}%`} />
       </div>
-      <div className="glass rounded-2xl p-5">
+      <div className="surface rounded-2xl p-5">
         <div className="mb-3 flex items-center justify-between text-xs text-muted-foreground">
           <span>
             {voted.toLocaleString()} of {voters.toLocaleString()} voters have voted
           </span>
           {live && (
             <span className="flex items-center gap-1.5">
-              <span className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "animate-pulse-soft bg-emerald-400" : "bg-muted-foreground"}`} />
+              <span className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "animate-pulse-soft bg-success" : "bg-muted-foreground"}`} />
               {connected ? "Live" : "Connecting…"}
             </span>
           )}

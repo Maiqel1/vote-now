@@ -75,7 +75,7 @@ export default async function ActivityPage({ params }: { params: { id: string } 
       <p className="text-sm text-muted-foreground">
         A permanent record of every administrative action. It can&apos;t be edited or deleted, which helps resolve disputes.
       </p>
-      <div className="glass divide-y divide-border/50 overflow-hidden rounded-2xl">
+      <div className="surface divide-y divide-border/50 overflow-hidden rounded-2xl">
         {entries.length === 0 && <div className="p-6 text-sm text-muted-foreground">No activity yet.</div>}
         {entries.map((entry) => {
           const detail = describeMeta(entry, election.timezone);

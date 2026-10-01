@@ -47,13 +47,13 @@ export function ConfirmButton({
       </AlertDialogTrigger>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle className="font-playfair text-xl">{title}</AlertDialogTitle>
+          <AlertDialogTitle className="text-xl">{title}</AlertDialogTitle>
           <AlertDialogDescription asChild>
             <div className="text-sm leading-relaxed text-muted-foreground">{description}</div>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel disabled={busy} className="rounded-xl border-border bg-secondary/40">
+          <AlertDialogCancel disabled={busy} className="rounded-xl border-border bg-muted/50">
             Cancel
           </AlertDialogCancel>
           <Button variant={destructive ? "destructive" : "default"} onClick={confirm} disabled={busy}>

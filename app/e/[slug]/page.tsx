@@ -11,6 +11,7 @@ import { areResultsPublic, getEffectiveStatus } from "@/lib/election-status";
 import { formatDateTime } from "@/lib/format";
 import { getBallot } from "@/lib/server/elections";
 import { loadPublicElection } from "@/lib/server/public-election";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -41,11 +42,11 @@ export default async function ElectionHomePage({ params }: { params: { slug: str
         </Notice>
       )}
 
-      <div className="mb-10 animate-slide-up text-center">
+      <div className="mb-10 animate-fade-up text-center">
         <div className="mb-5 flex justify-center">
           <StatusBadge status={status} />
         </div>
-        <h1 className="mb-4 font-playfair text-4xl font-bold leading-tight text-foreground md:text-5xl">{election.title}</h1>
+        <h1 className="mb-4 text-4xl font-bold leading-tight text-foreground md:text-5xl">{election.title}</h1>
         {election.description && (
           <p className="mx-auto mb-6 max-w-xl whitespace-pre-line text-base leading-relaxed text-muted-foreground">{election.description}</p>
         )}
@@ -54,19 +55,19 @@ export default async function ElectionHomePage({ params }: { params: { slug: str
         </p>
       </div>
 
-      <div className="mb-12 flex animate-slide-up flex-col items-center gap-6 delay-100">
+      <div className="mb-12 flex animate-fade-up flex-col items-center gap-6">
         {status === "scheduled" && <Countdown target={election.startsAt} label="Voting opens in" />}
         {status === "open" && <Countdown target={election.endsAt} label="Voting closes in" />}
         {status === "paused" && <Notice tone="warning">Voting is temporarily paused by the organizers. Please check back shortly.</Notice>}
 
         <div className="flex flex-col items-center gap-3 sm:flex-row">
           {(status === "open" || status === "paused") && (
-            <Link href={`/e/${election.slug}/vote`} className="btn-primary text-sm">
+            <Link href={`/e/${election.slug}/vote`} className={buttonVariants({ size: "lg" })}>
               Vote now →
             </Link>
           )}
           {resultsPublic && (
-            <Link href={`/e/${election.slug}/results`} className={status === "closed" ? "btn-primary text-sm" : "btn-ghost text-sm"}>
+            <Link href={`/e/${election.slug}/results`} className={buttonVariants({ variant: status === "closed" ? "default" : "outline", size: "lg" })}>
               {status === "closed" ? "View results" : "Live results"}
             </Link>
           )}
@@ -83,9 +84,9 @@ export default async function ElectionHomePage({ params }: { params: { slug: str
         <section className="space-y-5">
           <h2 className="text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">On the ballot</h2>
           {ballot.positions.map((position) => (
-            <div key={position.id} className="glass overflow-hidden rounded-2xl">
+            <div key={position.id} className="surface overflow-hidden rounded-2xl">
               <div className="border-b border-border/60 px-6 py-4">
-                <h3 className="font-playfair text-lg font-bold">{position.title}</h3>
+                <h3 className="text-lg font-bold">{position.title}</h3>
                 {position.description && <p className="text-xs text-muted-foreground">{position.description}</p>}
                 <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground/60">{positionHint(position)}</p>
               </div>
@@ -107,7 +108,7 @@ export default async function ElectionHomePage({ params }: { params: { slug: str
 
       <div className="mt-10 text-center text-xs text-muted-foreground">
         Already voted?{" "}
-        <Link href={`/e/${election.slug}/verify`} className="text-amber-400/80 hover:text-amber-300">
+        <Link href={`/e/${election.slug}/verify`} className="text-brand-strong hover:text-brand-strong">
           Check your receipt
         </Link>
       </div>

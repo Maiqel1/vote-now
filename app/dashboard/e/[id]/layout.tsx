@@ -11,7 +11,7 @@ export default async function ElectionLayout({ children, params }: { children: R
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-8 md:px-6">
-      <Link href="/dashboard" className="mb-4 inline-block text-xs text-muted-foreground hover:text-amber-400">
+      <Link href="/dashboard" className="mb-4 inline-block text-xs text-muted-foreground hover:text-brand-strong">
         ← All elections
       </Link>
       <div className="mb-6 flex flex-wrap items-start justify-between gap-4">
@@ -20,13 +20,13 @@ export default async function ElectionLayout({ children, params }: { children: R
             <StatusBadge status={status} />
             {role === "observer" && <Badge variant="blue">Observer · read-only</Badge>}
           </div>
-          <h1 className="truncate font-playfair text-2xl font-bold md:text-3xl">{election.title}</h1>
+          <h1 className="truncate text-2xl font-bold md:text-3xl">{election.title}</h1>
           <p className="text-sm text-muted-foreground">{election.orgName}</p>
         </div>
         <Link
           href={`/e/${election.slug}`}
           target="_blank"
-          className="flex items-center gap-1.5 rounded-xl border border-border bg-secondary/40 px-3 py-2 text-xs text-foreground/75 transition-colors hover:bg-secondary hover:text-foreground"
+          className="flex items-center gap-1.5 rounded-xl border border-border bg-muted/50 px-3 py-2 text-xs text-foreground/75 transition-colors hover:bg-secondary hover:text-foreground"
         >
           Public page
           <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">

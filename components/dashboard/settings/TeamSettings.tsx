@@ -124,7 +124,7 @@ export function TeamSettings({
           </div>
         ))}
         {invites.map((inv) => (
-          <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 bg-secondary/20 px-4 py-3">
+          <div key={inv.id} className="flex flex-wrap items-center justify-between gap-3 bg-muted/50 px-4 py-3">
             <div className="min-w-0">
               <div className="truncate text-sm text-foreground/80">{inv.email}</div>
               <div className="text-xs text-muted-foreground">

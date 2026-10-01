@@ -13,9 +13,9 @@ export default async function VerifyPage({ params }: { params: { slug: string } 
 
   return (
     <PublicShell election={election}>
-      <div className="mx-auto max-w-md animate-slide-up">
+      <div className="mx-auto max-w-md animate-fade-up">
         <div className="mb-8 text-center">
-          <h1 className="mb-3 font-playfair text-3xl font-bold md:text-4xl">Verify your vote</h1>
+          <h1 className="mb-3 text-3xl font-bold md:text-4xl">Verify your vote</h1>
           <p className="text-sm leading-relaxed text-muted-foreground">
             Enter the receipt code you got after voting in {election.title}. We&apos;ll confirm your ballot was counted. Your choices stay secret.
           </p>

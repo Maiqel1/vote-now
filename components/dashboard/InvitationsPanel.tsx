@@ -149,9 +149,9 @@ export function InvitationsPanel({
       <div className="space-y-6">
         {sendBlockedReason && <Notice tone="warning">{sendBlockedReason}</Notice>}
 
-        <section className="glass space-y-4 rounded-2xl p-6">
+        <section className="surface space-y-4 rounded-2xl p-6">
           <div>
-            <h2 className="font-playfair text-xl font-bold">Invitation email</h2>
+            <h2 className="text-xl font-bold">Invitation email</h2>
             <p className="text-sm text-muted-foreground">
               Every voter gets a personal “Cast your vote” button and a backup code. Add an optional note from your organization.
             </p>
@@ -190,10 +190,10 @@ export function InvitationsPanel({
         </section>
 
         {progress && (
-          <div className="glass space-y-3 rounded-2xl p-6">
+          <div className="surface space-y-3 rounded-2xl p-6">
             <div className="flex items-center justify-between text-sm">
               <span className="flex items-center gap-2">
-                <Spinner className="text-amber-400" /> {progress.label}…
+                <Spinner className="text-brand-strong" /> {progress.label}…
               </span>
               <span className="text-muted-foreground">
                 {progress.done} / {progress.total}
@@ -206,9 +206,9 @@ export function InvitationsPanel({
         {notice && <Notice tone={notice.tone}>{notice.text}</Notice>}
 
         {canEdit && (
-          <section className="glass space-y-4 rounded-2xl p-6">
-            <h2 className="font-playfair text-xl font-bold">Send</h2>
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/30 p-4">
+          <section className="surface space-y-4 rounded-2xl p-6">
+            <h2 className="text-xl font-bold">Send</h2>
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4">
               <div>
                 <div className="text-sm font-medium">Invitations</div>
                 <div className="text-xs text-muted-foreground">
@@ -221,9 +221,9 @@ export function InvitationsPanel({
             </div>
 
             {stats.failed > 0 && (
-              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-red-500/20 bg-red-500/[0.05] p-4">
+              <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-danger/30 bg-danger-soft p-4">
                 <div>
-                  <div className="text-sm font-medium text-red-300">{stats.failed} failed</div>
+                  <div className="text-sm font-medium text-danger">{stats.failed} failed</div>
                   <div className="text-xs text-muted-foreground">
                     Usually a typo in the address. <Link href={`/dashboard/e/${electionId}/voters`} className="underline">Check the voter list</Link>.
                   </div>
@@ -234,7 +234,7 @@ export function InvitationsPanel({
               </div>
             )}
 
-            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/30 p-4">
+            <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4">
               <div>
                 <div className="text-sm font-medium">
                   Reminders · round {Math.min(reminderRound + (stats.reminderDue > 0 ? 0 : 1), FREE_PLAN.reminderRounds)} of {FREE_PLAN.reminderRounds}
@@ -274,7 +274,7 @@ export function InvitationsPanel({
           ["Failed", stats.failed],
           ["Voted", stats.voted],
         ].map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between rounded-xl border border-border bg-secondary/30 px-4 py-3 text-sm">
+          <div key={label} className="flex items-center justify-between rounded-xl border border-border bg-muted/50 px-4 py-3 text-sm">
             <span className="text-muted-foreground">{label}</span>
             <span className="font-medium">{value}</span>
           </div>
@@ -284,7 +284,7 @@ export function InvitationsPanel({
       <Dialog open={preview !== null} onOpenChange={(v) => !v && setPreview(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="font-playfair text-lg">{preview?.subject}</DialogTitle>
+            <DialogTitle className="text-lg">{preview?.subject}</DialogTitle>
           </DialogHeader>
           {preview && <iframe title="Email preview" srcDoc={preview.html} sandbox="" className="h-[65vh] w-full rounded-xl bg-white" />}
         </DialogContent>

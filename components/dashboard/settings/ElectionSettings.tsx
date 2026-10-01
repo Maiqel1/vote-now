@@ -205,7 +205,7 @@ export function BrandingForm({ election, canEdit }: { election: Election; canEdi
   return (
     <SettingsSection title="Branding" description="Your logo and colour on the public election page.">
       <div className="flex items-center gap-4">
-        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-border bg-secondary/40">
+        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-border bg-muted/50">
           {logoUrl ? <img src={imageUrl(logoUrl, 64, "fit")} alt="Logo" className="h-full w-full object-contain" /> : <span className="text-xs text-muted-foreground">No logo</span>}
         </div>
         {canEdit && (
@@ -268,13 +268,13 @@ export function DangerZone({ election, status, role }: { election: Election; sta
   return (
     <SettingsSection title="Danger zone" tone="danger" description="Actions here are permanent.">
       {role !== "observer" && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4">
           <div>
             <div className="text-sm font-medium">Duplicate election</div>
             <div className="text-xs text-muted-foreground">Copies details and ballot into a new draft, for example next year&apos;s election.</div>
             {election.piiPurgedAt === null && (
               <label className="mt-2 flex items-center gap-2 text-xs text-muted-foreground">
-                <input type="checkbox" checked={copyVoters} onChange={(e) => setCopyVoters(e.target.checked)} className="accent-amber-500" />
+                <input type="checkbox" checked={copyVoters} onChange={(e) => setCopyVoters(e.target.checked)} className="accent-brand" />
                 Also copy the voter list
               </label>
             )}
@@ -300,7 +300,7 @@ export function DangerZone({ election, status, role }: { election: Election; sta
       )}
 
       {isOwner && status === "closed" && election.piiPurgedAt === null && (
-        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-secondary/20 p-4">
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4">
           <div>
             <div className="text-sm font-medium">Delete voter data</div>
             <div className="text-xs text-muted-foreground">Removes every voter&apos;s name and email. Results and the activity log are kept.</div>
@@ -327,9 +327,9 @@ export function DangerZone({ election, status, role }: { election: Election; sta
       )}
 
       {isOwner && (
-        <div className="space-y-3 rounded-xl border border-red-500/20 bg-red-500/[0.04] p-4">
+        <div className="space-y-3 rounded-xl border border-danger/30 bg-danger-soft p-4">
           <div>
-            <div className="text-sm font-medium text-red-300">Delete election</div>
+            <div className="text-sm font-medium text-danger">Delete election</div>
             <div className="text-xs text-muted-foreground">Deletes the election, ballots, results, voters and photos. This can&apos;t be undone.</div>
           </div>
           <Input placeholder={`Type “${election.title}” to confirm`} value={confirmTitle} onChange={(e) => setConfirmTitle(e.target.value)} />

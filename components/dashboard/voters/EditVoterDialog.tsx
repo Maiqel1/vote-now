@@ -53,7 +53,7 @@ export function EditVoterDialog({
     <Dialog open={voter !== null} onOpenChange={(v) => !v && onClose()}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle className="font-playfair text-xl">Edit voter</DialogTitle>
+          <DialogTitle className="text-xl">Edit voter</DialogTitle>
         </DialogHeader>
         <div className="space-y-4">
           <div className="space-y-2">

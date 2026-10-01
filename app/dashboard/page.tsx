@@ -1,6 +1,9 @@
 import Link from "next/link";
 import { StatusBadge } from "@/components/election/StatusBadge";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { GlowCard } from "@/components/ui/glow-card";
+import { Progress } from "@/components/ui/progress";
 import { requireUser } from "@/lib/auth/session";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { formatDateTime, pluralize } from "@/lib/format";
@@ -23,16 +26,17 @@ function ElectionCard({ election, voted, role }: { election: Election; voted: nu
   const status = getEffectiveStatus(election);
   const turnout = election.counts.voters > 0 ? Math.round((voted / election.counts.voters) * 100) : 0;
   return (
-    <Link href={`/dashboard/e/${election.id}`} className="glass card-hover group block rounded-2xl p-5">
+    <Link href={`/dashboard/e/${election.id}`} className="group block rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring">
+      <GlowCard className="h-full" innerClassName="flex h-full flex-col p-5">
       <div className="mb-3 flex items-start justify-between gap-3">
         <StatusBadge status={status} />
         {role !== "owner" && <Badge>{role === "admin" ? "Co-admin" : "Observer"}</Badge>}
       </div>
-      <h3 className="mb-1 line-clamp-2 font-playfair text-lg font-bold text-foreground group-hover:text-amber-300">
+      <h3 className="mb-1 line-clamp-2 text-lg font-semibold text-foreground">
         {election.title}
       </h3>
-      <p className="mb-4 truncate text-xs text-muted-foreground">{election.orgName}</p>
-      <div className="flex items-end justify-between text-xs text-muted-foreground">
+      <p className="mb-5 truncate text-xs text-muted-foreground">{election.orgName}</p>
+      <div className="mt-auto flex items-end justify-between text-xs text-muted-foreground">
         <div>
           {status === "closed" ? "Closed " : status === "open" || status === "paused" ? "Closes " : "Opens "}
           {formatDateTime(status === "draft" || status === "scheduled" ? election.startsAt : election.endsAt, election.timezone)}
@@ -42,6 +46,8 @@ function ElectionCard({ election, voted, role }: { election: Election; voted: nu
           {status !== "draft" && status !== "scheduled" && <div>{turnout}% turnout</div>}
         </div>
       </div>
+      {status !== "draft" && status !== "scheduled" && <Progress value={turnout} className="mt-3 h-1" />}
+      </GlowCard>
     </Link>
   );
 }
@@ -68,36 +74,36 @@ export default async function DashboardPage() {
     <main className="mx-auto max-w-6xl px-4 pt-10 md:px-6">
       <div className="mb-10 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="mb-1 font-playfair text-3xl font-bold md:text-4xl">Your elections</h1>
+          <h1 className="mb-1 text-3xl font-semibold md:text-4xl">Your elections</h1>
           <p className="text-sm text-muted-foreground">
             Free plan · {activeOwned} of {FREE_PLAN.activeElections} active elections · up to {FREE_PLAN.votersPerElection} voters each
           </p>
         </div>
         {atLimit ? (
           <div className="text-right text-xs text-muted-foreground">
-            <span className="btn-ghost pointer-events-none mb-1 text-sm opacity-50">+ New election</span>
+            <span className={buttonVariants({ variant: "outline", className: "pointer-events-none mb-1 opacity-50" })}>+ New election</span>
             <div>Limit reached. Delete a draft or wait for one to close.</div>
           </div>
         ) : (
-          <Link href="/dashboard/new" className="btn-primary text-sm">
+          <Link href="/dashboard/new" className={buttonVariants({ size: "lg" })}>
             + New election
           </Link>
         )}
       </div>
 
       {elections.length === 0 ? (
-        <div className="glass mx-auto max-w-xl animate-slide-up rounded-2xl p-10 text-center">
-          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-amber-500/20 bg-amber-500/10 text-amber-400">
+        <div className="surface mx-auto max-w-xl animate-fade-up rounded-2xl p-10 text-center">
+          <div className="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-2xl border border-brand/40 bg-brand-soft text-brand-strong">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5">
               <path d="M9 12l2 2 4-4M7 3h10a2 2 0 012 2v14a2 2 0 01-2 2H7a2 2 0 01-2-2V5a2 2 0 012-2z" />
             </svg>
           </div>
-          <h2 className="mb-2 font-playfair text-2xl font-bold">Run your first election</h2>
+          <h2 className="mb-2 text-2xl font-semibold">Run your first election</h2>
           <p className="mb-6 text-sm leading-relaxed text-muted-foreground">
             Set up positions and candidates, upload your voter list, and send everyone a secure ballot link. It takes about ten
             minutes.
           </p>
-          <Link href="/dashboard/new" className="btn-primary text-sm">
+          <Link href="/dashboard/new" className={buttonVariants({ size: "lg" })}>
             Create an election
           </Link>
         </div>

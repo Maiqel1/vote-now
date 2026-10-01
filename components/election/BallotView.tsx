@@ -19,16 +19,16 @@ function Indicator({ selected, square }: { selected: boolean; square?: boolean }
       className={cn(
         "flex h-5 w-5 flex-shrink-0 items-center justify-center border-2 transition-all",
         square ? "rounded-md" : "rounded-full",
-        selected ? "border-amber-500 bg-amber-500" : "border-border",
+        selected ? "border-brand bg-brand" : "border-border",
       )}
     >
       {selected &&
         (square ? (
-          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="hsl(224 45% 6%)" strokeWidth="3.5">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" className="text-background" strokeWidth="3.5">
             <polyline points="20 6 9 17 4 12" />
           </svg>
         ) : (
-          <span className="h-2 w-2 rounded-full bg-amber-950" />
+          <span className="h-2 w-2 rounded-full bg-background" />
         ))}
     </span>
   );
@@ -46,7 +46,7 @@ function Bio({ candidate }: { candidate: Candidate }) {
           e.stopPropagation();
           setOpen((v) => !v);
         }}
-        className="text-xs text-amber-400/80 hover:text-amber-300"
+        className="text-xs text-brand-strong hover:text-brand-strong"
       >
         {open ? "Hide manifesto" : "Read manifesto"}
       </button>
@@ -82,10 +82,10 @@ function OptionRow({
         }
       }}
       className={cn(
-        "flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-500/50",
+        "flex cursor-pointer items-center gap-4 rounded-xl border p-4 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/50",
         selected
-          ? "border-amber-500/30 bg-amber-500/[0.12]"
-          : "border-transparent bg-secondary/40 hover:border-border hover:bg-secondary/70",
+          ? "border-brand/40 bg-brand-soft"
+          : "border-transparent bg-muted/50 hover:border-border hover:bg-secondary/70",
         disabled && "cursor-not-allowed opacity-70",
       )}
     >
@@ -123,17 +123,17 @@ export function PositionCard({
 
   return (
     <div
-      className="glass animate-slide-up overflow-hidden rounded-2xl"
+      className="surface animate-fade-up overflow-hidden rounded-2xl"
       style={index !== undefined ? { animationDelay: `${Math.min(index, 8) * 0.07}s` } : undefined}
     >
       <div className="flex items-start justify-between gap-3 border-b border-border/60 px-5 py-4 md:px-6">
         <div className="min-w-0">
-          <h2 className="font-playfair text-lg font-bold text-foreground">{position.title}</h2>
+          <h2 className="text-lg font-bold text-foreground">{position.title}</h2>
           {position.description && <p className="mt-0.5 text-xs text-muted-foreground">{position.description}</p>}
           <p className="mt-1 text-[11px] uppercase tracking-wider text-muted-foreground/60">{positionHint(position)}</p>
         </div>
         {value.length > 0 && (
-          <div className="flex flex-shrink-0 items-center gap-1.5 text-xs font-medium text-emerald-400">
+          <div className="flex flex-shrink-0 items-center gap-1.5 text-xs font-medium text-success">
             <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
               <polyline points="20 6 9 17 4 12" />
             </svg>
@@ -145,7 +145,7 @@ export function PositionCard({
       <div className="space-y-2 p-3 md:p-4">
         {position.type === "yesno" && position.candidates[0] ? (
           <>
-            <div className="flex items-center gap-4 rounded-xl bg-secondary/20 p-4">
+            <div className="flex items-center gap-4 rounded-xl bg-muted/50 p-4">
               <CandidateAvatar name={position.candidates[0].name} photoUrl={position.candidates[0].photoUrl} />
               <div className="min-w-0">
                 <div className="text-sm font-medium text-foreground">{position.candidates[0].name}</div>

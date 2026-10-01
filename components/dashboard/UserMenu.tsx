@@ -34,14 +34,14 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
     <div className="relative" ref={ref}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex h-9 w-9 items-center justify-center rounded-full border border-amber-500/30 bg-amber-500/10 text-xs font-semibold text-amber-400 transition-colors hover:bg-amber-500/20"
+        className="flex h-9 w-9 items-center justify-center rounded-full border border-brand/40 bg-brand-soft text-xs font-semibold text-brand-strong transition-colors hover:bg-brand-soft"
         aria-label="Account menu"
         aria-expanded={open}
       >
         {initials || "?"}
       </button>
       {open && (
-        <div className="absolute right-0 top-11 z-50 w-60 animate-slide-up-sm rounded-xl border border-border bg-card p-2 shadow-2xl">
+        <div className="absolute right-0 top-11 z-50 w-60 animate-fade-up rounded-xl border border-border bg-card p-2 shadow-2xl">
           <div className="border-b border-border/60 px-3 py-2">
             <div className="truncate text-sm font-medium text-foreground">{name || "Your account"}</div>
             <div className="truncate text-xs text-muted-foreground">{email}</div>
@@ -60,7 +60,7 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
           >
             Account
           </Link>
-          <button onClick={signOut} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-red-400 hover:bg-red-500/10">
+          <button onClick={signOut} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-danger hover:bg-danger-soft">
             Sign out
           </button>
         </div>

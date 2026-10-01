@@ -8,7 +8,7 @@ import { CandidateAvatar } from "./CandidateAvatar";
 
 function CrownIcon() {
   return (
-    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-amber-400" aria-hidden>
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="text-brand-strong" aria-hidden>
       <path d="M2 19h20v2H2v-2zM2 6l5 8 5-7 5 7 5-8v11H2V6z" />
     </svg>
   );
@@ -16,15 +16,15 @@ function CrownIcon() {
 
 function Bar({ pct, highlight }: { pct: number; highlight: boolean }) {
   return (
-    <div className="h-2 overflow-hidden rounded-full" style={{ background: "hsl(224 35% 14%)" }}>
+    <div className="h-2 overflow-hidden rounded-full bg-muted">
       <div
         className="h-full rounded-full transition-all duration-700"
         style={{
           width: `${pct}%`,
           background: highlight
-            ? "linear-gradient(90deg, hsl(38 92% 45%), hsl(38 95% 62%))"
-            : "linear-gradient(90deg, hsl(224 35% 22%), hsl(224 35% 30%))",
-          boxShadow: highlight ? "0 0 12px hsl(38 92% 56% / 0.4)" : "none",
+            ? "linear-gradient(90deg, hsl(var(--brand) / 0.75), hsl(var(--brand)))"
+            : "hsl(var(--muted-foreground) / 0.35)",
+          boxShadow: highlight ? "0 0 12px hsl(var(--brand) / 0.35)" : "none",
         }}
       />
     </div>
@@ -37,10 +37,10 @@ function PositionResultCard({ result, index, final }: { result: PositionResult; 
   const winnerLabel = final ? "Winner" : "Leading";
 
   return (
-    <div className="glass animate-slide-up overflow-hidden rounded-2xl" style={{ animationDelay: `${Math.min(index, 8) * 0.08}s` }}>
+    <div className="surface animate-fade-up overflow-hidden rounded-2xl" style={{ animationDelay: `${Math.min(index, 8) * 0.08}s` }}>
       <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border/60 px-6 py-5">
         <div>
-          <h2 className="font-playfair text-xl font-bold text-foreground">{position.title}</h2>
+          <h2 className="text-xl font-bold text-foreground">{position.title}</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
             {result.participating} vote{result.participating === 1 ? "" : "s"}
             {result.abstained > 0 && ` · ${result.abstained} abstained`}
@@ -73,7 +73,7 @@ function PositionResultCard({ result, index, final }: { result: PositionResult; 
                     <span className="capitalize text-foreground/80">{choice}</span>
                     <span className="flex items-center gap-3">
                       <span className="text-xs text-muted-foreground">{pct.toFixed(1)}%</span>
-                      <span className="min-w-[2rem] text-right font-playfair font-semibold tabular-nums">{count}</span>
+                      <span className="min-w-[2rem] text-right font-semibold tabular-nums">{count}</span>
                     </span>
                   </div>
                   <Bar pct={pct} highlight={leading} />
@@ -91,7 +91,7 @@ function PositionResultCard({ result, index, final }: { result: PositionResult; 
                   <div className="flex min-w-0 items-center gap-3">
                     <div
                       className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                        isWinner ? "bg-amber-500 text-amber-950" : "bg-secondary text-muted-foreground"
+                        isWinner ? "bg-brand text-brand-foreground" : "bg-secondary text-muted-foreground"
                       }`}
                     >
                       {i + 1}
@@ -99,16 +99,16 @@ function PositionResultCard({ result, index, final }: { result: PositionResult; 
                     <CandidateAvatar name={entry.candidate.name} photoUrl={entry.candidate.photoUrl} className="hidden h-8 w-8 text-xs sm:flex" />
                     <span className={`truncate text-sm font-medium ${isWinner ? "text-foreground" : "text-foreground/75"}`}>{entry.candidate.name}</span>
                     {isWinner && (
-                      <span className="flex flex-shrink-0 items-center gap-1 text-[11px] text-amber-400">
+                      <span className="flex flex-shrink-0 items-center gap-1 text-[11px] text-brand-strong">
                         <CrownIcon />
                         <span className="hidden sm:inline">{winnerLabel}</span>
                       </span>
                     )}
-                    {isTied && <span className="flex-shrink-0 text-[11px] text-amber-300">Tied</span>}
+                    {isTied && <span className="flex-shrink-0 text-[11px] text-brand-strong">Tied</span>}
                   </div>
                   <div className="flex flex-shrink-0 items-center gap-3">
-                    <span className={`text-xs ${isWinner ? "font-semibold text-amber-400" : "text-muted-foreground"}`}>{entry.share.toFixed(1)}%</span>
-                    <span className="min-w-[2rem] text-right font-playfair text-sm font-semibold tabular-nums">{entry.votes}</span>
+                    <span className={`text-xs ${isWinner ? "font-semibold text-brand-strong" : "text-muted-foreground"}`}>{entry.share.toFixed(1)}%</span>
+                    <span className="min-w-[2rem] text-right text-sm font-semibold tabular-nums">{entry.votes}</span>
                   </div>
                 </div>
                 <Bar pct={entry.share} highlight={isWinner} />
@@ -146,18 +146,18 @@ export function ResultsView({
   return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 gap-4">
-        <div className="glass rounded-2xl p-6 text-center">
-          <div className="stat-number">{results.totalBallots.toLocaleString()}</div>
+        <div className="surface rounded-2xl p-6 text-center">
+          <div className="stat">{results.totalBallots.toLocaleString()}</div>
           <div className="mt-1 text-sm tracking-wide text-muted-foreground">Ballots cast</div>
         </div>
-        <div className="glass rounded-2xl p-6 text-center">
-          <div className="font-playfair text-5xl font-bold leading-none text-foreground">{turnout.toFixed(turnout > 0 && turnout < 10 ? 1 : 0)}%</div>
+        <div className="surface rounded-2xl p-6 text-center">
+          <div className="text-5xl font-bold leading-none text-foreground">{turnout.toFixed(turnout > 0 && turnout < 10 ? 1 : 0)}%</div>
           <div className="mt-1 text-sm tracking-wide text-muted-foreground">Turnout of {eligibleVoters.toLocaleString()} voters</div>
         </div>
       </div>
       {live && (
         <div className="flex items-center justify-center gap-2 text-xs text-muted-foreground">
-          <span className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "animate-pulse-soft bg-emerald-400" : "bg-muted-foreground"}`} />
+          <span className={`inline-block h-1.5 w-1.5 rounded-full ${connected ? "animate-pulse-soft bg-success" : "bg-muted-foreground"}`} />
           {connected ? "Updating live" : "Connecting…"}
         </div>
       )}

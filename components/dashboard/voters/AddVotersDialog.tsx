@@ -37,7 +37,7 @@ function Summary({ report }: { report: AddVotersReport }) {
         {report.overLimit > 0 && ` ${report.overLimit} not added because of the free plan's voter limit.`}
       </Notice>
       {report.invalid.length > 0 && (
-        <div className="max-h-32 overflow-y-auto rounded-xl border border-border bg-secondary/30 p-3 text-xs text-muted-foreground">
+        <div className="max-h-32 overflow-y-auto rounded-xl border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
           {report.invalid.slice(0, 50).map((row) => (
             <div key={`${row.row}-${row.value}`}>
               Row {row.row}: “{row.value || "(empty)"}”, {row.reason.toLowerCase()}
@@ -125,7 +125,7 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
       </DialogTrigger>
       <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="font-playfair text-xl">Add voters</DialogTitle>
+          <DialogTitle className="text-xl">Add voters</DialogTitle>
           <DialogDescription>Each voter gets a personal ballot link and code when you send invitations.</DialogDescription>
         </DialogHeader>
 
@@ -185,7 +185,7 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
 
         {mode === "csv" && (
           <div className="space-y-4">
-            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-secondary/20 p-6 text-center transition-colors hover:bg-secondary/40">
+            <label className="flex cursor-pointer flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-border bg-muted/50 p-6 text-center transition-colors hover:bg-muted/50">
               <span className="text-sm text-foreground/80">{fileName || "Choose a .csv file"}</span>
               <span className="text-xs text-muted-foreground">Needs a header row with an email column. Excel: File → Save As → CSV.</span>
               <input
@@ -224,12 +224,12 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
                   ))}
                 </div>
                 <div className="overflow-hidden rounded-xl border border-border">
-                  <div className="bg-secondary/40 px-3 py-2 text-[11px] uppercase tracking-wider text-muted-foreground">
+                  <div className="bg-muted/50 px-3 py-2 text-[11px] uppercase tracking-wider text-muted-foreground">
                     Preview · {csv.rows.length} rows · {validCount} valid
                   </div>
                   {candidates.slice(0, 5).map((c, i) => (
                     <div key={i} className="flex justify-between gap-3 border-t border-border/50 px-3 py-2 text-xs">
-                      <span className={EMAIL_RE.test(c.email) ? "text-foreground/80" : "text-red-400"}>{c.email || "(no email)"}</span>
+                      <span className={EMAIL_RE.test(c.email) ? "text-foreground/80" : "text-danger"}>{c.email || "(no email)"}</span>
                       <span className="truncate text-muted-foreground">{c.name}</span>
                     </div>
                   ))}

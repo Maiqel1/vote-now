@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { TurnstileField, turnstileConfigured } from "@/components/auth/TurnstileField";
 import { BallotView, isAnswered, type DraftSelections } from "@/components/election/BallotView";
 import { Notice } from "@/components/feedback/Notice";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
@@ -145,11 +145,11 @@ export function VoteFlow({
 
   const header = (eyebrow: string, heading: React.ReactNode, sub?: React.ReactNode) => (
     <div className="mb-8 text-center">
-      <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-amber-400">
-        <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-amber-400" />
+      <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand-soft px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-brand-strong">
+        <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-brand" />
         {eyebrow}
       </div>
-      <h1 className="mb-3 font-playfair text-3xl font-bold text-foreground md:text-4xl">{heading}</h1>
+      <h1 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">{heading}</h1>
       {sub && <p className="text-sm text-muted-foreground">{sub}</p>}
     </div>
   );
@@ -157,9 +157,9 @@ export function VoteFlow({
   return (
     <div ref={topRef} className="scroll-mt-24">
       {step === "token" && (
-        <div className="mx-auto max-w-md animate-slide-up">
+        <div className="mx-auto max-w-md animate-fade-up">
           {header("Polls open", "Ready to vote?", title)}
-          <div className="glass space-y-5 rounded-2xl p-6 md:p-8">
+          <div className="surface space-y-5 rounded-2xl p-6 md:p-8">
             <p className="text-sm leading-relaxed text-muted-foreground">
               You&apos;re using your personal voting link. Your ballot is secret: the organizers can see <em>that</em> you voted, never{" "}
               <em>how</em>.
@@ -177,10 +177,10 @@ export function VoteFlow({
       )}
 
       {step === "code" && (
-        <div className="mx-auto max-w-md animate-slide-up">
+        <div className="mx-auto max-w-md animate-fade-up">
           {header("Polls open", "Verify to vote", "Enter the email you were invited with and the code from your invitation.")}
           <form
-            className="glass space-y-5 rounded-2xl p-6 md:p-8"
+            className="surface space-y-5 rounded-2xl p-6 md:p-8"
             onSubmit={(e) => {
               e.preventDefault();
               authenticate({ email, code, turnstileToken });
@@ -225,9 +225,9 @@ export function VoteFlow({
       )}
 
       {step === "resend" && (
-        <div className="mx-auto max-w-md animate-slide-up">
+        <div className="mx-auto max-w-md animate-fade-up">
           {header("Polls open", "Get a new voting link", "We'll email a fresh link and code to the address on the voter list.")}
-          <form className="glass space-y-5 rounded-2xl p-6 md:p-8" onSubmit={requestLink}>
+          <form className="surface space-y-5 rounded-2xl p-6 md:p-8" onSubmit={requestLink}>
             <div className="space-y-2">
               <Label htmlFor="resend-email">Email address</Label>
               <Input id="resend-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -252,10 +252,10 @@ export function VoteFlow({
             "Cast your vote",
             title,
             <>
-              Voting as <span className="text-amber-400">{voterDisplay}</span>. Your choices are secret and can&apos;t be changed after you submit.
+              Voting as <span className="text-brand-strong">{voterDisplay}</span>. Your choices are secret and can&apos;t be changed after you submit.
             </>,
           )}
-          <div className="sticky top-16 z-30 -mx-4 mb-6 border-b border-border/40 px-4 py-3 md:mx-0 md:rounded-xl md:border" style={{ background: "hsl(224 45% 6% / 0.9)", backdropFilter: "blur(16px)" }}>
+          <div className="sticky top-20 z-30 -mx-4 mb-6 border-b border-border/60 bg-background/80 px-4 py-3 backdrop-blur-xl md:mx-0 md:rounded-xl md:border">
             <div className="mb-2 flex justify-between text-xs text-muted-foreground">
               <span>
                 {answered} of {ordered.length} answered
@@ -264,7 +264,7 @@ export function VoteFlow({
             </div>
             <div className="flex gap-1.5">
               {ordered.map((p) => (
-                <div key={p.id} className={cn("h-1 flex-1 rounded-full transition-colors", isAnswered(p, selections) ? "bg-amber-500" : "bg-secondary")} />
+                <div key={p.id} className={cn("h-1 flex-1 rounded-full transition-colors", isAnswered(p, selections) ? "bg-brand" : "bg-secondary")} />
               ))}
             </div>
           </div>
@@ -284,9 +284,9 @@ export function VoteFlow({
       )}
 
       {step === "review" && (
-        <div className="mx-auto max-w-xl animate-slide-up">
+        <div className="mx-auto max-w-xl animate-fade-up">
           {header("Almost done", "Review your ballot", "Check your choices. Once submitted, your vote is final.")}
-          <div className="glass divide-y divide-border/50 overflow-hidden rounded-2xl">
+          <div className="surface divide-y divide-border/50 overflow-hidden rounded-2xl">
             {ordered.map((p) => {
               const value = selections[p.id] ?? [];
               let display: string;
@@ -316,19 +316,19 @@ export function VoteFlow({
       )}
 
       {step === "done" && (
-        <div className="mx-auto max-w-md animate-slide-up text-center">
+        <div className="mx-auto max-w-md animate-fade-up text-center">
           <div className="mb-8 flex justify-center">
-            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-emerald-500/25 bg-emerald-500/10">
-              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-emerald-400">
+            <div className="flex h-20 w-20 items-center justify-center rounded-full border border-success/30 bg-success-soft">
+              <svg width="32" height="32" viewBox="0 0 24 24" fill="none" className="text-success">
                 <path d="M9 12L11 14L15 10M21 12C21 16.971 16.971 21 12 21C7.029 21 3 16.971 3 12C3 7.029 7.029 3 12 3C16.971 3 21 7.029 21 12Z" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
               </svg>
             </div>
           </div>
-          <h1 className="mb-3 font-playfair text-4xl font-bold">Vote counted</h1>
+          <h1 className="mb-3 text-4xl font-bold">Vote counted</h1>
           <p className="mb-8 text-muted-foreground">Thank you for voting. Your ballot has been recorded securely and anonymously.</p>
-          <div className="glass mb-6 rounded-2xl p-6">
+          <div className="surface mb-6 rounded-2xl p-6">
             <div className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">Your receipt code</div>
-            <div className="mb-4 font-mono text-2xl font-bold tracking-[0.2em] text-amber-400">{receipt}</div>
+            <div className="mb-4 font-mono text-2xl font-bold tracking-[0.2em] text-brand-strong">{receipt}</div>
             <Button
               variant="outline"
               size="sm"
@@ -341,26 +341,26 @@ export function VoteFlow({
             </Button>
             <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
               We&apos;ve also emailed it to you. Use it on the{" "}
-              <Link href={`/e/${slug}/verify`} className="text-amber-400/80 underline">
+              <Link href={`/e/${slug}/verify`} className="text-brand-strong underline">
                 verify page
               </Link>{" "}
               to confirm your ballot was counted. It doesn&apos;t reveal how you voted.
             </p>
           </div>
-          <Link href={`/e/${slug}`} className="btn-ghost text-sm">
+          <Link href={`/e/${slug}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
             ← Back to election
           </Link>
         </div>
       )}
 
       {step === "voted" && (
-        <div className="mx-auto max-w-md animate-slide-up text-center">
+        <div className="mx-auto max-w-md animate-fade-up text-center">
           {header("Already voted", "You've already voted", info || "Each voter can vote once.")}
           <div className="flex justify-center gap-3">
-            <Link href={`/e/${slug}/verify`} className="btn-ghost text-sm">
+            <Link href={`/e/${slug}/verify`} className={buttonVariants({ variant: "outline", size: "lg" })}>
               Check your receipt
             </Link>
-            <Link href={`/e/${slug}`} className="btn-ghost text-sm">
+            <Link href={`/e/${slug}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
               Election page
             </Link>
           </div>

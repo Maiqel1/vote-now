@@ -44,8 +44,8 @@ export function Countdown({ target, label }: { target: number; label: string }) 
       <div className="mb-3 text-xs uppercase tracking-widest text-muted-foreground">{label}</div>
       <div className="flex justify-center gap-3">
         {units.map(([unit, value]) => (
-          <div key={unit} className="glass w-16 rounded-xl py-2.5">
-            <div className="font-playfair text-2xl font-bold tabular-nums text-foreground">{String(value).padStart(2, "0")}</div>
+          <div key={unit} className="surface w-16 rounded-xl py-2.5">
+            <div className="text-2xl font-bold tabular-nums text-foreground">{String(value).padStart(2, "0")}</div>
             <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{unit}</div>
           </div>
         ))}

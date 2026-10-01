@@ -11,7 +11,7 @@ export function Progress({ value, className }: { value: number; className?: stri
       aria-valuenow={Math.round(clamped)}
     >
       <div
-        className="h-full rounded-full bg-gradient-to-r from-amber-600 to-amber-400 transition-all duration-500"
+        className="h-full rounded-full bg-gradient-to-r from-brand/70 to-brand transition-all duration-500"
         style={{ width: `${clamped}%` }}
       />
     </div>

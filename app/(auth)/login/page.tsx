@@ -50,7 +50,7 @@ function LoginForm() {
       footer={
         <>
           New to VoteNow?{" "}
-          <Link href={`/signup${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-amber-400 hover:text-amber-300">
+          <Link href={`/signup${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`} className="text-brand-strong hover:text-brand-strong">
             Create an account
           </Link>
         </>
@@ -83,7 +83,7 @@ function LoginForm() {
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <Label htmlFor="password">Password</Label>
-            <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-amber-400">
+            <Link href="/forgot-password" className="text-xs text-muted-foreground hover:text-brand-strong">
               Forgot password?
             </Link>
           </div>

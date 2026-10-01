@@ -29,7 +29,7 @@ export function VerifyReceipt({ slug }: { slug: string }) {
   }
 
   return (
-    <form onSubmit={check} className="glass space-y-5 rounded-2xl p-6 md:p-8">
+    <form onSubmit={check} className="surface space-y-5 rounded-2xl p-6 md:p-8">
       <div className="space-y-2">
         <Label htmlFor="receipt">Receipt code</Label>
         <Input

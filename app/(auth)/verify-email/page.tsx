@@ -84,7 +84,7 @@ function VerifyEmail() {
         </>
       }
       footer={
-        <Link href={next} className="text-muted-foreground hover:text-amber-400">
+        <Link href={next} className="text-muted-foreground hover:text-brand-strong">
           Skip for now. You can set up elections but can&apos;t send invitations yet.
         </Link>
       }

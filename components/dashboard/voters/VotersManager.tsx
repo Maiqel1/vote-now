@@ -181,8 +181,8 @@ export function VotersManager({
       )}
 
       {canEdit && selectedRows.length > 0 && (
-        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-amber-500/20 bg-amber-500/[0.06] px-4 py-3 text-sm">
-          <span className="text-amber-300">{selectedRows.length} selected</span>
+        <div className="flex flex-wrap items-center gap-3 rounded-xl border border-brand/40 bg-brand-soft px-4 py-3 text-sm">
+          <span className="text-brand-strong">{selectedRows.length} selected</span>
           <Button size="sm" variant="outline" onClick={printSelected} disabled={!editable || printing}>
             {printing && <Spinner />}
             Print credential slips
@@ -205,10 +205,10 @@ export function VotersManager({
         </div>
       )}
 
-      <div className="glass overflow-hidden rounded-2xl">
+      <div className="surface overflow-hidden rounded-2xl">
         {voters.length === 0 ? (
           <div className="p-10 text-center">
-            <h3 className="mb-1 font-playfair text-xl font-bold">No voters yet</h3>
+            <h3 className="mb-1 text-xl font-bold">No voters yet</h3>
             <p className="text-sm text-muted-foreground">Add voters one by one, paste a list, or import a CSV from a spreadsheet.</p>
           </div>
         ) : (
@@ -217,7 +217,7 @@ export function VotersManager({
               <tr>
                 {canEdit && (
                   <TH className="w-10">
-                    <input type="checkbox" aria-label="Select all" checked={allVisibleSelected} onChange={toggleAll} className="accent-amber-500" />
+                    <input type="checkbox" aria-label="Select all" checked={allVisibleSelected} onChange={toggleAll} className="accent-brand" />
                   </TH>
                 )}
                 <TH>Voter</TH>
@@ -236,7 +236,7 @@ export function VotersManager({
                         aria-label={`Select ${voter.email}`}
                         checked={selected.has(voter.id)}
                         onChange={() => toggle(voter.id)}
-                        className="accent-amber-500"
+                        className="accent-brand"
                       />
                     </TD>
                   )}

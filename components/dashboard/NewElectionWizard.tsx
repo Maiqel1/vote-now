@@ -114,15 +114,15 @@ export function NewElectionWizard() {
       <ol className="mb-8 flex items-center gap-2">
         {STEPS.map((label, i) => (
           <li key={label} className="flex flex-1 flex-col gap-2">
-            <div className={cn("h-1 rounded-full transition-colors", i <= step ? "bg-amber-500" : "bg-secondary")} />
-            <span className={cn("text-xs", i === step ? "text-amber-400" : "text-muted-foreground/60")}>
+            <div className={cn("h-1 rounded-full transition-colors", i <= step ? "bg-brand" : "bg-secondary")} />
+            <span className={cn("text-xs", i === step ? "text-brand-strong" : "text-muted-foreground/60")}>
               {i + 1}. {label}
             </span>
           </li>
         ))}
       </ol>
 
-      <div className="glass animate-slide-up-sm space-y-6 rounded-2xl p-6 md:p-8" key={step}>
+      <div className="surface animate-fade-up space-y-6 rounded-2xl p-6 md:p-8" key={step}>
         {step === 0 && (
           <>
             <div className="space-y-2">
@@ -159,7 +159,7 @@ export function NewElectionWizard() {
             </div>
             <div className="space-y-2">
               <Label htmlFor="slug">Public link</Label>
-              <div className="flex items-center overflow-hidden rounded-xl border border-border bg-input/60 focus-within:border-amber-500/50">
+              <div className="flex items-center overflow-hidden rounded-xl border border-border bg-background/70 focus-within:border-brand/40">
                 <span className="hidden whitespace-nowrap pl-4 text-sm text-muted-foreground sm:inline">{host}/e/</span>
                 <input
                   id="slug"
@@ -173,8 +173,8 @@ export function NewElectionWizard() {
                 />
                 <span className="pr-4 text-xs">
                   {slugState === "checking" && <Spinner className="h-3.5 w-3.5 text-muted-foreground" />}
-                  {slugState === "available" && <span className="text-emerald-400">Available</span>}
-                  {slugState === "taken" && <span className="text-red-400">Taken</span>}
+                  {slugState === "available" && <span className="text-success">Available</span>}
+                  {slugState === "taken" && <span className="text-danger">Taken</span>}
                 </span>
               </div>
             </div>
@@ -203,7 +203,7 @@ export function NewElectionWizard() {
         {step === 2 && (
           <div className="space-y-3">
             <div>
-              <h2 className="mb-1 font-playfair text-xl font-bold">Who sees the results, and when?</h2>
+              <h2 className="mb-1 text-xl font-bold">Who sees the results, and when?</h2>
               <p className="text-sm text-muted-foreground">You can change this later, up until results are published.</p>
             </div>
             <VisibilityOptions value={visibility} onChange={setVisibility} />

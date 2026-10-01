@@ -18,7 +18,7 @@ export function CandidateAvatar({ name, photoUrl, className }: { name: string; p
   return (
     <div
       className={cn(
-        "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-amber-500/20 bg-amber-500/10 font-playfair text-sm font-bold text-amber-400",
+        "flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full border border-brand/40 bg-brand-soft text-sm font-bold text-brand-strong",
         className,
       )}
       aria-hidden

@@ -9,18 +9,19 @@ import { formatDateTime, maskName } from "@/lib/format";
 import { getBallot, votersCol } from "@/lib/server/elections";
 import { loadPublicElection } from "@/lib/server/public-election";
 import type { Voter } from "@/lib/types";
+import { buttonVariants } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Vote", robots: { index: false } };
 
 function StateCard({ eyebrow, title, children }: { eyebrow: string; title: string; children: React.ReactNode }) {
   return (
-    <div className="mx-auto max-w-xl animate-slide-up py-8 text-center">
-      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-amber-500/20 bg-amber-500/10 px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-amber-400">
-        <span className="inline-block h-1.5 w-1.5 rounded-full bg-amber-400" />
+    <div className="mx-auto max-w-xl animate-fade-up py-8 text-center">
+      <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-brand-soft px-3 py-1.5 text-xs font-medium uppercase tracking-widest text-brand-strong">
+        <span className="inline-block h-1.5 w-1.5 rounded-full bg-brand" />
         {eyebrow}
       </div>
-      <h1 className="mb-6 font-playfair text-4xl font-bold leading-tight md:text-5xl">{title}</h1>
+      <h1 className="mb-6 text-4xl font-bold leading-tight md:text-5xl">{title}</h1>
       {children}
     </div>
   );
@@ -53,11 +54,11 @@ export default async function VotePage({ params, searchParams }: { params: { slu
           </p>
           <div className="flex justify-center gap-3">
             {resultsPublic && (
-              <Link href={`/e/${election.slug}/results`} className="btn-primary text-sm">
+              <Link href={`/e/${election.slug}/results`} className={buttonVariants({ size: "lg" })}>
                 View results
               </Link>
             )}
-            <Link href={`/e/${election.slug}`} className="btn-ghost text-sm">
+            <Link href={`/e/${election.slug}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
               Election page
             </Link>
           </div>
@@ -86,7 +87,7 @@ export default async function VotePage({ params, searchParams }: { params: { slu
   }
 
   return (
-    <PublicShell election={election}>
+    <PublicShell election={election} intensity="soft">
       <VoteFlow
         slug={election.slug}
         title={election.title}

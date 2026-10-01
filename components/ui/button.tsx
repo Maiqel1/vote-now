@@ -5,24 +5,27 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-lg text-sm font-medium ring-offset-background transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground font-semibold hover:bg-amber-400 hover:shadow-[0_0_24px_hsl(38_92%_56%/0.3)]",
+        default: "bg-primary text-primary-foreground shadow-sm hover:bg-primary/85",
+        accent: "bg-brand text-brand-foreground shadow-sm hover:bg-brand/90",
         destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+          "bg-destructive text-destructive-foreground shadow-sm hover:bg-destructive/90",
         outline:
-          "border border-border bg-secondary/40 text-foreground/80 hover:bg-secondary hover:text-foreground",
+          "border border-border bg-background/60 text-foreground shadow-sm backdrop-blur hover:bg-accent",
         secondary:
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
-        ghost: "text-foreground/70 hover:bg-secondary/60 hover:text-foreground",
-        link: "text-primary underline-offset-4 hover:underline",
+        ghost: "text-muted-foreground hover:bg-accent hover:text-foreground",
+        link: "text-brand-strong underline-offset-4 hover:underline",
+        shimmer:
+          "animate-shimmer border border-foreground/10 bg-[linear-gradient(110deg,hsl(var(--primary))_40%,hsl(var(--brand)/0.55)_50%,hsl(var(--primary))_60%)] bg-[length:200%_100%] text-primary-foreground shadow-md hover:shadow-lg motion-reduce:animate-none",
       },
       size: {
         default: "h-10 px-4 py-2",
-        sm: "h-9 rounded-lg px-3 text-xs",
-        lg: "h-12 rounded-full px-8",
+        sm: "h-8 rounded-md px-3 text-xs",
+        lg: "h-12 rounded-full px-7 text-sm",
         icon: "h-10 w-10",
       },
     },

@@ -1,4 +1,7 @@
 import { Logo } from "@/components/brand/Logo";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
+import { AuroraBackdrop } from "@/components/ui/aurora-background";
+import { FloatingNavbar } from "@/components/ui/floating-navbar";
 
 export function AuthCard({
   title,
@@ -12,17 +15,15 @@ export function AuthCard({
   footer?: React.ReactNode;
 }) {
   return (
-    <main className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-16">
-      <div className="pointer-events-none absolute left-1/2 top-0 h-[400px] w-[600px] -translate-x-1/2 rounded-full bg-amber-500/[0.04] blur-[80px]" />
-      <div className="absolute left-0 right-0 top-0 flex items-center px-6 py-5 md:px-8">
-        <Logo />
-      </div>
-      <div className="relative z-10 w-full max-w-md animate-slide-up">
+    <main className="relative flex min-h-screen flex-col items-center justify-center px-4 py-28">
+      <AuroraBackdrop />
+      <FloatingNavbar left={<Logo />} right={<ThemeToggle />} />
+      <div className="relative w-full max-w-md animate-fade-up">
         <div className="mb-8 text-center">
-          <h1 className="mb-2 font-playfair text-3xl font-bold text-foreground md:text-4xl">{title}</h1>
+          <h1 className="mb-2 text-3xl font-semibold text-foreground md:text-4xl">{title}</h1>
           {subtitle && <p className="text-sm text-muted-foreground">{subtitle}</p>}
         </div>
-        <div className="glass space-y-5 rounded-2xl p-6 md:p-8">{children}</div>
+        <div className="surface space-y-5 rounded-2xl p-6 md:p-8">{children}</div>
         {footer && <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div>}
       </div>
     </main>
@@ -42,10 +43,10 @@ export function GoogleIcon() {
 
 export function OrDivider() {
   return (
-    <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground/60">
-      <div className="divider flex-1" />
+    <div className="flex items-center gap-3 text-[11px] uppercase tracking-widest text-muted-foreground">
+      <div className="h-px flex-1 bg-border" />
       or
-      <div className="divider flex-1" />
+      <div className="h-px flex-1 bg-border" />
     </div>
   );
 }

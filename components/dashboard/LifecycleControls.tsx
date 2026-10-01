@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
@@ -125,7 +125,7 @@ export function LifecycleControls({
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle className="font-playfair text-xl">Extend voting</DialogTitle>
+                <DialogTitle className="text-xl">Extend voting</DialogTitle>
                 <DialogDescription>Choose a new closing time. This is recorded in the activity log.</DialogDescription>
               </DialogHeader>
               <div className="space-y-2">
@@ -174,7 +174,7 @@ export function LifecycleControls({
       )}
 
       {status === "closed" && (
-        <Link href={`/dashboard/e/${electionId}/results`} className="btn-ghost px-4 py-2 text-sm">
+        <Link href={`/dashboard/e/${electionId}/results`} className={buttonVariants({ variant: "outline" })}>
           View results
         </Link>
       )}

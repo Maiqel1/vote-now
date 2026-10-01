@@ -13,9 +13,9 @@ export default async function AccountPage() {
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 pt-10 md:px-6">
-      <h1 className="font-playfair text-3xl font-bold">Account</h1>
+      <h1 className="text-3xl font-bold">Account</h1>
 
-      <section className="glass space-y-5 rounded-2xl p-6">
+      <section className="surface space-y-5 rounded-2xl p-6">
         <div>
           <div className="text-xs uppercase tracking-wide text-muted-foreground">Email</div>
           <div className="mt-1 flex items-center gap-2 text-sm">
@@ -32,9 +32,9 @@ export default async function AccountPage() {
         <AccountForm name={user.name} />
       </section>
 
-      <section className="glass space-y-3 rounded-2xl p-6">
+      <section className="surface space-y-3 rounded-2xl p-6">
         <div className="flex items-center justify-between">
-          <h2 className="font-playfair text-lg font-bold">Plan</h2>
+          <h2 className="text-lg font-bold">Plan</h2>
           <Badge variant="amber">Free</Badge>
         </div>
         <ul className="space-y-1.5 text-sm text-muted-foreground">

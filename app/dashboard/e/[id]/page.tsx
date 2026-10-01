@@ -11,11 +11,11 @@ import { ballotReadinessIssues } from "@/lib/validation";
 
 function ChecklistItem({ done, title, detail, href }: { done: boolean; title: string; detail: string; href?: string }) {
   const body = (
-    <div className="flex items-start gap-3 rounded-xl border border-border bg-secondary/30 p-4 transition-colors hover:bg-secondary/50">
+    <div className="flex items-start gap-3 rounded-xl border border-border bg-muted/50 p-4 transition-colors hover:bg-secondary/50">
       <span
         className={cn(
           "mt-0.5 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border",
-          done ? "border-emerald-500/40 bg-emerald-500/15 text-emerald-400" : "border-border text-transparent",
+          done ? "border-success/30 bg-success-soft text-success" : "border-border text-transparent",
         )}
       >
         <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3">
@@ -47,7 +47,7 @@ export default async function OverviewPage({ params }: { params: { id: string } 
       <div className="space-y-8">
         <section className="space-y-4">
           <div className="flex flex-wrap items-center justify-between gap-3">
-            <h2 className="font-playfair text-xl font-bold">Voting</h2>
+            <h2 className="text-xl font-bold">Voting</h2>
             <div className="text-xs text-muted-foreground">
               {formatDateTime(election.startsAt, election.timezone)} → {formatDateTime(election.endsAt, election.timezone)}
             </div>

@@ -36,18 +36,18 @@ export default async function OpenGraphImage({ params }: { params: { slug: strin
           flexDirection: "column",
           justifyContent: "space-between",
           padding: 72,
-          background: "linear-gradient(135deg, #0b1020 0%, #121a33 60%, #2a1f0a 100%)",
-          color: "#f3ede3",
+          background: "radial-gradient(ellipse at 100% 0%, #fed7aa 0%, #fff7ed 35%, #ffffff 70%)",
+          color: "#09090b",
         }}
       >
         <div style={{ display: "flex", alignItems: "center", gap: 16 }}>
-          <div style={{ width: 44, height: 44, borderRadius: 12, background: meta?.accentColor ?? "#f5a524" }} />
-          <div style={{ fontSize: 30, opacity: 0.85 }}>{org}</div>
+          <div style={{ width: 44, height: 44, borderRadius: 12, background: meta?.accentColor ?? "#f97316" }} />
+          <div style={{ fontSize: 30, color: "#52525b" }}>{org}</div>
         </div>
         <div style={{ fontSize: 72, fontWeight: 700, lineHeight: 1.1, maxWidth: 1000 }}>{title}</div>
-        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, opacity: 0.7 }}>
+        <div style={{ display: "flex", justifyContent: "space-between", fontSize: 26, color: "#52525b" }}>
           <span>Secret ballot · One vote per voter</span>
-          <span style={{ color: "#f5a524" }}>VoteNow</span>
+          <span style={{ color: "#c2410c" }}>VoteNow</span>
         </div>
       </div>
     ),

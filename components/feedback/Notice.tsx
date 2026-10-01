@@ -3,10 +3,10 @@ import { cn } from "@/lib/utils";
 type Tone = "error" | "success" | "info" | "warning";
 
 const TONES: Record<Tone, string> = {
-  error: "bg-destructive/10 border-destructive/20 text-red-400",
-  success: "bg-emerald-500/10 border-emerald-500/20 text-emerald-400",
-  info: "bg-blue-500/10 border-blue-500/20 text-blue-300",
-  warning: "bg-amber-500/10 border-amber-500/20 text-amber-300",
+  error: "bg-danger-soft border-danger/25 text-danger",
+  success: "bg-success-soft border-success/25 text-success",
+  info: "bg-info-soft border-info/25 text-info",
+  warning: "bg-warning-soft border-warning/25 text-warning",
 };
 
 function Icon({ tone }: { tone: Tone }) {

@@ -13,11 +13,11 @@ export default async function NewElectionPage() {
 
   return (
     <main className="mx-auto max-w-6xl px-4 pt-10 md:px-6">
-      <Link href="/dashboard" className="mb-6 inline-block text-xs text-muted-foreground hover:text-amber-400">
+      <Link href="/dashboard" className="mb-6 inline-block text-xs text-muted-foreground hover:text-brand-strong">
         ← All elections
       </Link>
       <div className="mx-auto mb-8 max-w-2xl">
-        <h1 className="mb-1 font-playfair text-3xl font-bold md:text-4xl">New election</h1>
+        <h1 className="mb-1 text-3xl font-bold md:text-4xl">New election</h1>
         <p className="text-sm text-muted-foreground">Start with the basics. You&apos;ll add positions, candidates and voters next.</p>
       </div>
       {active >= FREE_PLAN.activeElections ? (

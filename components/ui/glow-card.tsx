@@ -33,7 +33,7 @@ export function GlowCard({
     >
       <div
         className={cn(
-          "relative h-full rounded-[15px] bg-card/90 backdrop-blur-xl [background-image:radial-gradient(420px_circle_at_var(--x,50%)_var(--y,50%),hsl(var(--brand)/calc(var(--o)*0.06)),transparent_50%)]",
+          "relative h-full rounded-[15px] bg-card/95 [background-image:radial-gradient(420px_circle_at_var(--x,50%)_var(--y,50%),hsl(var(--brand)/calc(var(--o)*0.06)),transparent_50%)]",
           innerClassName,
         )}
       >

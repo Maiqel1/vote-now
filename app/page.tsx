@@ -83,7 +83,7 @@ export default async function Home() {
 
       <section className="relative mx-auto flex max-w-5xl flex-col items-center px-6 pb-20 pt-32 text-center md:pb-24 md:pt-40">
         <Spotlight className="-left-10 -top-40 md:-left-32 md:-top-20" />
-        <div className="relative mb-8 inline-flex animate-fade-up items-center gap-2 rounded-full border border-brand/30 bg-brand-soft/80 px-3 py-1 text-xs font-medium text-brand-strong backdrop-blur">
+        <div className="relative mb-8 inline-flex animate-fade-up items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand-strong">
           <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-brand" />
           Free for elections up to {FREE_PLAN.votersPerElection} voters
         </div>
@@ -147,7 +147,7 @@ export default async function Home() {
         </Link>
       </section>
 
-      <footer className="relative border-t border-border/70 bg-background/60 backdrop-blur">
+      <footer className="relative border-t border-border/70 bg-background/80">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground">
           <Logo />
           <a href={`mailto:${process.env.SUPPORT_EMAIL ?? "support@vote-now.xyz"}`} className="hover:text-foreground">

@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 
 const ITEMS = [
@@ -17,17 +18,23 @@ const ITEMS = [
 export function ElectionNav({ electionId }: { electionId: string }) {
   const pathname = usePathname();
   const base = `/dashboard/e/${electionId}`;
+  const [pending, setPending] = useState<string | null>(null);
+
+  useEffect(() => setPending(null), [pathname]);
 
   return (
     <nav className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
       <div className="flex min-w-max gap-1 border-b border-border/60">
         {ITEMS.map((item) => {
           const href = `${base}${item.href}`;
-          const active = item.href === "" ? pathname === base : pathname.startsWith(href);
+          const active = pending ? pending === href : item.href === "" ? pathname === base : pathname.startsWith(href);
           return (
             <Link
               key={item.label}
               href={href}
+              onClick={() => {
+                if (href !== pathname) setPending(href);
+              }}
               className={cn(
                 "-mb-px border-b-2 px-3 py-2.5 text-sm transition-colors",
                 active

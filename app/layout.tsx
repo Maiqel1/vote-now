@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import { ThemeProvider } from "@/components/theme/ThemeProvider";
+import { NavigationProgress } from "@/components/ui/navigation-progress";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -34,6 +35,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <ThemeProvider>
+          <NavigationProgress />
           {children}
           <Toaster />
         </ThemeProvider>

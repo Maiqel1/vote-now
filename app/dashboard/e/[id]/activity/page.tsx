@@ -29,6 +29,7 @@ const LABELS: Record<string, string> = {
   "voting.paused": "paused voting",
   "voting.resumed": "resumed voting",
   "voting.closed_early": "closed voting early",
+  "voting.started_manually": "started voting manually",
   "voting.extended": "extended voting",
   "results.published": "published the results",
   "team.invited": "invited a team member",

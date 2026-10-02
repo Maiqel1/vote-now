@@ -23,6 +23,7 @@ import {
   publishElection,
   publishResults,
   setPaused,
+  startVotingNow,
   unpublishElection,
 } from "@/lib/actions/elections";
 import { fromLocalInput, toLocalInput } from "@/lib/client/datetime";
@@ -35,6 +36,7 @@ export function LifecycleControls({
   endsAt,
   canEdit,
   ready,
+  startReady,
   visibility,
   resultsPublished,
 }: {
@@ -43,6 +45,7 @@ export function LifecycleControls({
   endsAt: number;
   canEdit: boolean;
   ready: boolean;
+  startReady: boolean;
   visibility: ResultsVisibility;
   resultsPublished: boolean;
 }) {
@@ -50,6 +53,16 @@ export function LifecycleControls({
   const [busy, setBusy] = useState(false);
   const [extendOpen, setExtendOpen] = useState(false);
   const [newEnd, setNewEnd] = useState(() => toLocalInput(endsAt + 60 * 60 * 1000));
+  const [startOpen, setStartOpen] = useState(false);
+  const [startEnd, setStartEnd] = useState("");
+
+  function openStartDialog(open: boolean) {
+    if (open) {
+      const now = Date.now();
+      setStartEnd(toLocalInput(endsAt > now + 5 * 60 * 1000 ? endsAt : now + 24 * 60 * 60 * 1000));
+    }
+    setStartOpen(open);
+  }
 
   async function perform(action: () => Promise<ActionResult<unknown>>, success: string): Promise<boolean> {
     setBusy(true);
@@ -70,15 +83,52 @@ export function LifecycleControls({
 
   return (
     <div className="flex flex-wrap gap-2">
+      {(status === "draft" || status === "scheduled") && (
+        <Dialog open={startOpen} onOpenChange={openStartDialog}>
+          <DialogTrigger asChild>
+            <Button variant="accent" disabled={!startReady || busy}>
+              Start voting now
+            </Button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle className="text-xl">Start voting now</DialogTitle>
+              <DialogDescription>
+                Voting opens immediately{status === "draft" ? " and the election is published" : ""}. The ballot locks as soon as voting opens. This is recorded in the activity log.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-2">
+              <Label htmlFor="start-end">Voting closes at</Label>
+              <Input id="start-end" type="datetime-local" value={startEnd} onChange={(e) => setStartEnd(e.target.value)} />
+              <p className="text-xs text-muted-foreground">At least 5 minutes from now, at most 31 days. You can still close early or extend later.</p>
+            </div>
+            <DialogFooter>
+              <Button
+                disabled={busy || !startEnd}
+                onClick={async () => {
+                  if (await perform(() => startVotingNow(electionId, fromLocalInput(startEnd)), "Voting is open")) {
+                    setStartOpen(false);
+                  }
+                }}
+              >
+                {busy && <Spinner />}
+                Open voting
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
       {status === "draft" && (
         <ConfirmButton
+          variant="outline"
           title="Publish this election?"
-          description="Voters will be able to vote between the scheduled opening and closing times. Once voting opens, the ballot is locked and can't be changed."
+          description="Voting opens and closes automatically at the scheduled times. Once voting opens, the ballot is locked and can't be changed."
           confirmLabel="Publish"
           disabled={!ready || busy}
           onConfirm={() => perform(() => publishElection(electionId), "Election published")}
         >
-          Publish election
+          Publish (opens on schedule)
         </ConfirmButton>
       )}
 

@@ -270,6 +270,30 @@ export async function closeVotingEarly(electionId: string): Promise<ActionResult
   });
 }
 
+export async function startVotingNow(electionId: string, endsAt: number): Promise<ActionResult> {
+  return run(async () => {
+    const { election, actor } = await requireElection(electionId, "admin");
+    const status = getEffectiveStatus(election);
+    if (status !== "draft" && status !== "scheduled") return fail("Voting can only be started before it opens.");
+    const ballot = await getBallot(electionId);
+    const issues = ballotReadinessIssues(ballot);
+    if (issues.length > 0) return fail(issues[0]);
+    if (election.counts.voters === 0) return fail("Add at least one voter before starting.");
+    const now = Date.now();
+    if (!Number.isFinite(endsAt) || endsAt <= now + 5 * 60 * 1000) return fail("Set a closing time at least 5 minutes from now.");
+    if (endsAt - now > 1000 * 60 * 60 * 24 * 31) return fail("Voting can stay open for at most 31 days.");
+    await assertUnderActiveLimit(election.ownerId, electionId);
+    await electionDoc(electionId).update({ status: "published", paused: false, startsAt: now, endsAt, updatedAt: now });
+    await logAudit(electionId, actor, "voting.started_manually", {
+      wasDraft: election.status === "draft",
+      originalStartsAt: election.startsAt,
+      endsAt,
+    });
+    refresh(electionId);
+    return ok();
+  });
+}
+
 export async function extendVoting(electionId: string, newEndsAt: number): Promise<ActionResult> {
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "admin");

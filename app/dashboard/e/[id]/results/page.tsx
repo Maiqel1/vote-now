@@ -31,6 +31,7 @@ export default async function ResultsPage({ params }: { params: { id: string } }
               endsAt={election.endsAt}
               canEdit={canEdit}
               ready
+              startReady={false}
               visibility={election.results.visibility}
               resultsPublished={false}
             />

@@ -40,7 +40,8 @@ export default async function OverviewPage({ params }: { params: { id: string } 
   const positions = ballot.positions.length;
   const candidates = ballot.positions.reduce((n, p) => n + p.candidates.length, 0);
   const allInvited = election.counts.voters > 0 && election.counts.invited >= election.counts.voters;
-  const ready = ballotIssues.length === 0 && election.counts.voters > 0 && election.endsAt > Date.now() + 5 * 60 * 1000;
+  const startReady = ballotIssues.length === 0 && election.counts.voters > 0;
+  const ready = startReady && election.endsAt > Date.now() + 5 * 60 * 1000;
 
   return (
     <div className="grid gap-8 lg:grid-cols-[1fr_320px]">
@@ -55,8 +56,8 @@ export default async function OverviewPage({ params }: { params: { id: string } 
           {status === "paused" && <Notice tone="warning">Voting is paused. Voters can&apos;t submit ballots until you resume.</Notice>}
           {status === "draft" && election.endsAt <= Date.now() && (
             <Notice tone="warning">
-              The scheduled closing time has passed. <Link href={`${base}/settings`} className="underline">Update the schedule</Link> before
-              publishing.
+              The scheduled closing time has passed. Use <strong>Start voting now</strong> to open voting with a new closing time, or{" "}
+              <Link href={`${base}/settings`} className="underline">update the schedule</Link> in Settings.
             </Notice>
           )}
           <LifecycleControls
@@ -65,6 +66,7 @@ export default async function OverviewPage({ params }: { params: { id: string } 
             endsAt={election.endsAt}
             canEdit={canEdit}
             ready={ready}
+            startReady={startReady}
             visibility={election.results.visibility}
             resultsPublished={election.results.publishedAt !== null}
           />

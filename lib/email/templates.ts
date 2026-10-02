@@ -116,28 +116,6 @@ ${replaced}
   return { subject, html, text };
 }
 
-export function receiptEmail(params: { election: ElectionInfo; receipt: string }): RenderedEmail {
-  const { election, receipt } = params;
-  const verifyUrl = appUrl(`/e/${election.slug}/verify`);
-  const subject = `Your vote in ${election.title} was counted`;
-  const html = layout(
-    `<p style="margin:0 0 12px;">Your ballot for <strong>${escapeHtml(election.title)}</strong> has been recorded.</p>
-<p style="margin:0 0 6px;">Your receipt code:</p>
-<div style="margin:12px 0 20px;padding:14px;background:#f4f4f5;border-radius:10px;text-align:center;font-family:'Courier New',monospace;font-size:20px;letter-spacing:3px;font-weight:bold;">${receipt}</div>
-<p style="margin:0 0 12px;">You can confirm your ballot was counted at any time at <a href="${verifyUrl}" style="color:#c2410c;">${verifyUrl}</a>. Your choices stay secret, and the receipt doesn't reveal how you voted.</p>`,
-    voterFooter(election),
-  );
-  const text = [
-    `Your ballot for ${election.title} has been recorded.`,
-    "",
-    `Receipt code: ${receipt}`,
-    "",
-    `Confirm it was counted: ${verifyUrl}`,
-    "Your choices stay secret, and the receipt doesn't reveal how you voted.",
-  ].join("\n");
-  return { subject, html, text };
-}
-
 export function teamInviteEmail(params: {
   election: Pick<Election, "title" | "orgName">;
   inviterName: string;

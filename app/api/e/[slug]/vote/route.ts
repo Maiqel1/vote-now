@@ -3,12 +3,9 @@ import { randomInt } from "crypto";
 import { NextResponse } from "next/server";
 import { clearVoterSession, readVoterSession } from "@/lib/auth/voter-session";
 import { generateCode, sha256 } from "@/lib/crypto";
-import { sendEmail } from "@/lib/email";
-import { receiptEmail } from "@/lib/email/templates";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { adminDb } from "@/lib/firebase-admin";
 import { tallyIncrements } from "@/lib/results";
-import { reserveEmails } from "@/lib/server/email-quota";
 import {
   TALLY_SHARDS,
   ballotsCol,
@@ -68,7 +65,6 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   const db = adminDb();
   const voterRef = votersCol(election.id).doc(voterId);
   const electionRef = electionDoc(election.id);
-  let voterEmail = "";
 
   try {
     await db.runTransaction(async (tx) => {
@@ -78,7 +74,6 @@ export async function POST(request: Request, { params }: { params: { slug: strin
       if (voter.hasVoted) throw new VoteRejected("You have already voted.");
       const current = toElection(electionSnap.id, electionSnap.data());
       if (!current || getEffectiveStatus(current) !== "open") throw new VoteRejected("Voting is not open.");
-      voterEmail = voter.email;
 
       const now = Date.now();
       tx.update(voterRef, { hasVoted: true, votedAt: now, "invite.reminderDue": false });
@@ -97,15 +92,5 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   }
 
   clearVoterSession(election.id);
-
-  try {
-    if (voterEmail && (await reserveEmails(1)) > 0) {
-      const email = receiptEmail({ election, receipt });
-      await sendEmail({ to: voterEmail, ...email, fromName: `${election.orgName} via VoteNow` });
-    }
-  } catch (error) {
-    console.error("Receipt email failed", error);
-  }
-
   return NextResponse.json({ ok: true, receipt });
 }

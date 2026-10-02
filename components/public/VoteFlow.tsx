@@ -58,6 +58,9 @@ export function VoteFlow({
   const [selections, setSelections] = useState<DraftSelections>({});
   const [receipt, setReceipt] = useState("");
   const [copied, setCopied] = useState(false);
+  const [copyFailed, setCopyFailed] = useState(false);
+  const [downloaded, setDownloaded] = useState(false);
+  const receiptSaved = copied || downloaded;
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
   const turnstile = useRef<TurnstileInstance | undefined>(undefined);
   const topRef = useRef<HTMLDivElement>(null);
@@ -91,6 +94,47 @@ export function VoteFlow({
     window.addEventListener("beforeunload", warn);
     return () => window.removeEventListener("beforeunload", warn);
   }, [step, selections]);
+
+  useEffect(() => {
+    if (step !== "done" || receiptSaved) return;
+    const warn = (e: BeforeUnloadEvent) => {
+      e.preventDefault();
+      e.returnValue = "";
+    };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [step, receiptSaved]);
+
+  async function copyReceipt() {
+    try {
+      await navigator.clipboard.writeText(receipt);
+      setCopied(true);
+      setCopyFailed(false);
+    } catch {
+      setCopyFailed(true);
+    }
+  }
+
+  function downloadReceipt() {
+    const verifyUrl = `${window.location.origin}/e/${slug}/verify`;
+    const body = [
+      `Vote receipt: ${title}`,
+      "",
+      `Receipt code: ${receipt}`,
+      `Voted on: ${new Date().toLocaleString()}`,
+      "",
+      `Check that your ballot was counted: ${verifyUrl}`,
+      "This code does not reveal how you voted. Keep it private.",
+      "",
+    ].join("\n");
+    const url = URL.createObjectURL(new Blob([body], { type: "text/plain;charset=utf-8" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `vote-receipt-${slug}.txt`;
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+    setDownloaded(true);
+  }
 
   function resetTurnstile() {
     turnstile.current?.reset();
@@ -326,26 +370,38 @@ export function VoteFlow({
           </div>
           <h1 className="mb-3 text-4xl font-bold">Vote counted</h1>
           <p className="mb-8 text-muted-foreground">Thank you for voting. Your ballot has been recorded securely and anonymously.</p>
-          <div className="surface mb-6 rounded-2xl p-6">
-            <div className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">Your receipt code</div>
-            <div className="mb-4 font-mono text-2xl font-bold tracking-[0.2em] text-brand-strong">{receipt}</div>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={async () => {
-                await navigator.clipboard.writeText(receipt).catch(() => undefined);
-                setCopied(true);
-              }}
-            >
-              {copied ? "Copied" : "Copy receipt"}
-            </Button>
-            <p className="mt-4 text-xs leading-relaxed text-muted-foreground">
-              We&apos;ve also emailed it to you. Use it on the{" "}
-              <Link href={`/e/${slug}/verify`} className="text-brand-strong underline">
-                verify page
-              </Link>{" "}
-              to confirm your ballot was counted. It doesn&apos;t reveal how you voted.
-            </p>
+          <div className="surface mb-6 overflow-hidden rounded-2xl text-left">
+            <div className="border-b border-warning/25 bg-warning-soft px-5 py-3 text-sm font-medium text-warning">
+              Save this code now. You won&apos;t be able to see it again.
+            </div>
+            <div className="p-6 text-center">
+              <div className="mb-2 text-xs uppercase tracking-widest text-muted-foreground">Your receipt code</div>
+              <div className="mb-5 select-all font-mono text-2xl font-bold tracking-[0.2em] text-brand-strong">{receipt}</div>
+              <div className="flex flex-col justify-center gap-2 sm:flex-row">
+                <Button variant={copied ? "outline" : "default"} onClick={copyReceipt}>
+                  {copied ? "Copied ✓" : "Copy code"}
+                </Button>
+                <Button variant="outline" onClick={downloadReceipt}>
+                  {downloaded ? "Downloaded ✓" : "Download as file"}
+                </Button>
+              </div>
+              {copyFailed && (
+                <p className="mt-3 text-xs text-danger">Couldn&apos;t copy automatically. Select the code above and copy it, or download it.</p>
+              )}
+            </div>
+            <div className="space-y-2 border-t border-border/70 bg-muted/40 px-5 py-4 text-xs leading-relaxed text-muted-foreground">
+              <p>
+                Use it on the{" "}
+                <Link href={`/e/${slug}/verify`} className="text-brand-strong underline">
+                  verify page
+                </Link>{" "}
+                any time to confirm your ballot was counted. It doesn&apos;t reveal how you voted.
+              </p>
+              <p>
+                Lost it? The organizers can confirm that you voted, but they can&apos;t recover this code or see how you voted.
+                That&apos;s what keeps your ballot secret.
+              </p>
+            </div>
           </div>
           <Link href={`/e/${slug}`} className={buttonVariants({ variant: "outline", size: "lg" })}>
             ← Back to election

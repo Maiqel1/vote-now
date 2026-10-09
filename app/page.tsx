@@ -9,7 +9,6 @@ import { FloatingNavbar } from "@/components/ui/floating-navbar";
 import { Spotlight } from "@/components/ui/spotlight";
 import { TextGenerate } from "@/components/ui/text-generate";
 import { getCurrentUser } from "@/lib/auth/session";
-import { FREE_PLAN } from "@/lib/plans";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -85,7 +84,7 @@ export default async function Home() {
         <Spotlight className="-left-10 -top-40 md:-left-32 md:-top-20" />
         <div className="relative mb-8 inline-flex animate-fade-up items-center gap-2 rounded-full border border-brand/30 bg-brand-soft px-3 py-1 text-xs font-medium text-brand-strong">
           <span className="inline-block h-1.5 w-1.5 animate-pulse-soft rounded-full bg-brand" />
-          Free for elections up to {FREE_PLAN.votersPerElection} voters
+          Start free · No credit card
         </div>
         <h1 className="relative mb-6 text-balance text-[clamp(2.6rem,7vw,5rem)] font-bold leading-[1.02] tracking-tighter text-foreground">
           <TextGenerate text="Run an election people actually trust." highlight={["trust"]} />
@@ -140,7 +139,7 @@ export default async function Home() {
       <section className="relative mx-auto max-w-3xl px-6 pb-28 text-center">
         <h2 className="mb-4 text-3xl font-semibold text-foreground md:text-4xl">Your next election starts here.</h2>
         <p className="mb-8 text-muted-foreground">
-          Free plan: {FREE_PLAN.activeElections} active elections, {FREE_PLAN.votersPerElection} voters each, email invitations and reminders included.
+          Start free. No credit card. Email invitations, reminders and live results included.
         </p>
         <Link href={startHref} className={buttonVariants({ variant: "shimmer", size: "lg" })}>
           Create your election

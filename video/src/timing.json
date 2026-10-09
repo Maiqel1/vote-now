@@ -1,0 +1,8 @@
+{
+  "bpm": 93.75,
+  "offsetFrames": 10,
+  "source": "music.mp3",
+  "trackSeconds": 168.9,
+  "biggestLiftAtBeat": 32,
+  "audioTrimFrames": 499
+}

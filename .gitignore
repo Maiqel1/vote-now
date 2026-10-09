@@ -46,3 +46,8 @@ ui-debug.log
 database-debug.log
 pubsub-debug.log
 .firebase/
+
+# promo video (track is licensed for use, not redistribution)
+video/public/music.mp3
+video/node_modules/
+video/out/

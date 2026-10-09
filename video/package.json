@@ -1,0 +1,28 @@
+{
+  "name": "vote-now-video",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "render": "remotion render src/index.ts VoteNowPromo out/votenow-promo.mp4 --codec=h264 --crf=20",
+    "render:webm": "remotion render src/index.ts VoteNowPromo out/votenow-promo.webm --codec=vp9 --crf=32",
+    "poster": "remotion still src/index.ts VoteNowPromo out/poster.jpg --frame=1153 --image-format=jpeg",
+    "analyze": "node scripts/analyze-music.mjs"
+  },
+  "dependencies": {
+    "@remotion/cli": "4.0.534",
+    "@remotion/fonts": "4.0.534",
+    "@remotion/media-utils": "4.0.534",
+    "@remotion/tailwind": "4.0.534",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "4.0.534"
+  },
+  "devDependencies": {
+    "@remotion/bundler": "^4.0.534",
+    "@remotion/renderer": "^4.0.534",
+    "@types/react": "^18.3.0",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5.4.0"
+  }
+}

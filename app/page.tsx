@@ -1,6 +1,7 @@
 import { BarChart3, CheckCircle2, FileLock2, KeyRound, ListChecks, Lock, Mail, ScrollText, Trash2, Users } from "lucide-react";
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
+import { PromoVideo } from "@/components/landing/PromoVideo";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { AuroraBackdrop } from "@/components/ui/aurora-background";
 import { BentoGrid, BentoItem } from "@/components/ui/bento-grid";
@@ -12,6 +13,9 @@ import { getCurrentUser } from "@/lib/auth/session";
 import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
+
+const PROMO = "https://res.cloudinary.com/wf36alzb/video/upload";
+const PROMO_ID = "v1791562311/vote-now/marketing/votenow-promo";
 
 const STEPS = [
   {
@@ -110,6 +114,14 @@ export default async function Home() {
           <span className="inline-block h-1 w-1 rounded-full bg-brand" />
           <span>Fair</span>
         </div>
+      </section>
+
+      <section id="demo" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 pb-24">
+        <div className="mb-10 text-center">
+          <p className="mb-2 text-sm font-medium text-brand-strong">See it in action</p>
+          <h2 className="text-3xl font-semibold text-foreground md:text-4xl">From setup to results in under a minute</h2>
+        </div>
+        <PromoVideo src={`${PROMO}/q_auto/${PROMO_ID}.mp4`} poster={`${PROMO}/so_38.4,w_1600,q_auto,f_auto/${PROMO_ID}.jpg`} />
       </section>
 
       <section id="how" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 pb-24">

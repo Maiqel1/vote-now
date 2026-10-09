@@ -10,7 +10,8 @@
     "audit-2025": "ts-node --project tsconfig.node.json scripts/audit-2025.ts",
     "migrate-2025": "ts-node --project tsconfig.node.json scripts/migrate-2025.ts",
     "test": "vitest run",
-    "test:rules": "firebase emulators:exec --only firestore --project demo-vote-now-rules \"vitest run --config vitest.rules.config.ts\""
+    "test:rules": "firebase emulators:exec --only firestore --project demo-vote-now-rules \"vitest run --config vitest.rules.config.ts\"",
+    "video": "npm --prefix video run studio"
   },
   "dependencies": {
     "@marsidev/react-turnstile": "^1.6.1",

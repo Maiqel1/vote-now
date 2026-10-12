@@ -24,6 +24,15 @@ export const metadata: Metadata = {
   title: { default: "VoteNow · Secure online elections", template: "%s · VoteNow" },
   description:
     "Create an election, invite your voters and get results you can trust. Secret ballots, one vote per voter, live turnout.",
+  applicationName: "VoteNow",
+  openGraph: {
+    type: "website",
+    siteName: "VoteNow",
+    title: "VoteNow · Secure online elections",
+    description: "Build the ballot, invite your voters and publish results you can trust. Secret ballots, one vote per voter, live turnout.",
+  },
+  twitter: { card: "summary_large_image" },
+  verification: { google: "izZgC2imvgDy4tRi9AmvQtby16FpRqjR0jUdPlMXwgU" },
 };
 
 export const viewport: Viewport = {

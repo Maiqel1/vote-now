@@ -8,7 +8,6 @@ const nextConfig = {
     return [
       { source: "/results", destination: "/e/shmc-2025/results", permanent: false },
       { source: "/vote", destination: "/e/shmc-2025", permanent: false },
-      { source: "/admin", destination: "/dashboard", permanent: false },
     ];
   },
   async rewrites() {
@@ -30,6 +29,10 @@ const nextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
+      ...["/e/:path*", "/admin/:path*", "/admin", "/dashboard/:path*", "/dashboard", "/invite/:path*", "/verify-email", "/forgot-password"].map((source) => ({
+        source,
+        headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
+      })),
     ];
   },
 };

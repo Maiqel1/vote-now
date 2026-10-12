@@ -14,6 +14,8 @@ import { cn } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
+export const metadata = { alternates: { canonical: "/" } };
+
 const PROMO = "https://res.cloudinary.com/wf36alzb/video/upload";
 const PROMO_ID = "v1791562311/vote-now/marketing/votenow-promo";
 

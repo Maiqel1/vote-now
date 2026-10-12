@@ -3,6 +3,7 @@ import { Notice } from "@/components/feedback/Notice";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { appUrl } from "@/lib/format";
 import { votersCol } from "@/lib/server/elections";
+import { limitsForElection } from "@/lib/server/limits";
 import { loadElectionPage } from "@/lib/server/page";
 import type { Voter, VoterRow } from "@/lib/types";
 
@@ -15,7 +16,7 @@ export default async function VotersPage({ params }: { params: { id: string } })
     return <Notice tone="info">Voter data for this election was deleted. Aggregate results are kept.</Notice>;
   }
 
-  const snap = await votersCol(election.id).get();
+  const [snap, limits] = await Promise.all([votersCol(election.id).get(), limitsForElection(election)]);
   const voters: VoterRow[] = snap.docs
     .map((d) => {
       const v = d.data() as Voter;
@@ -38,6 +39,7 @@ export default async function VotersPage({ params }: { params: { id: string } })
   return (
     <VotersManager
       electionId={election.id}
+      limits={limits}
       voters={voters}
       canEdit={canEdit}
       editable={status !== "closed"}

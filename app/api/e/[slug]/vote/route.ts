@@ -16,6 +16,8 @@ import {
   toElection,
   votersCol,
 } from "@/lib/server/elections";
+import { RATE_KEYS } from "@/lib/rate-limit-keys";
+import { withErrorLog } from "@/lib/server/error-log";
 import { rateLimit } from "@/lib/server/rate-limit";
 import type { Voter } from "@/lib/types";
 import { validateSelections } from "@/lib/validation";
@@ -28,7 +30,7 @@ function formatReceipt(raw: string): string {
   return raw.match(/.{1,4}/g)?.join("-") ?? raw;
 }
 
-export async function POST(request: Request, { params }: { params: { slug: string } }) {
+async function handlePost(request: Request, { params }: { params: { slug: string } }) {
   const election = await getElectionBySlug(params.slug);
   if (!election || election.status !== "published") {
     return NextResponse.json({ error: "Election not found." }, { status: 404 });
@@ -39,7 +41,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
     return NextResponse.json({ error: "Your voting session expired. Open your voting link again.", expired: true }, { status: 401 });
   }
 
-  const limit = await rateLimit(`vote:${election.id}:${voterId}`, 10, 10 * 60 * 1000);
+  const limit = await rateLimit(RATE_KEYS.vote(election.id, voterId), 10, 10 * 60 * 1000);
   if (!limit.ok) return NextResponse.json({ error: "Too many attempts. Please wait a few minutes." }, { status: 429 });
 
   const status = getEffectiveStatus(election);
@@ -94,3 +96,5 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   clearVoterSession(election.id);
   return NextResponse.json({ ok: true, receipt });
 }
+
+export const POST = withErrorLog("api: cast vote", handlePost);

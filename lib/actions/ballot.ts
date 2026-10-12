@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { isBallotLocked } from "../election-status";
 import { logAudit } from "../server/audit";
 import { ballotDoc } from "../server/elections";
+import { limitsForElection } from "../server/limits";
 import { isAllowedImageUrl } from "../image-url";
 import type { ActionResult } from "../types";
 import { ballotSchema } from "../validation";
@@ -15,6 +16,14 @@ export async function saveBallot(electionId: string, input: unknown): Promise<Ac
     if (isBallotLocked(election)) return fail("The ballot is locked because voting has started.");
     const parsed = ballotSchema.safeParse(input);
     if (!parsed.success) return fail(zodMessage(parsed.error));
+
+    const limits = await limitsForElection(election);
+    if (parsed.data.positions.length > limits.positionsPerElection) {
+      return fail(`At most ${limits.positionsPerElection} positions per election.`);
+    }
+    if (parsed.data.positions.reduce((n, p) => n + p.candidates.length, 0) > limits.candidatesPerElection) {
+      return fail(`At most ${limits.candidatesPerElection} candidates per election.`);
+    }
 
     for (const position of parsed.data.positions) {
       for (const candidate of position.candidates) {

@@ -4,6 +4,8 @@ import { hashCode, hashToken, normalizeCode } from "@/lib/crypto";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { formatDateTime, maskName } from "@/lib/format";
 import { getElectionBySlug, votersCol } from "@/lib/server/elections";
+import { RATE_KEYS } from "@/lib/rate-limit-keys";
+import { withErrorLog } from "@/lib/server/error-log";
 import { clientIp, rateLimit, retryMessage } from "@/lib/server/rate-limit";
 import { verifyTurnstile } from "@/lib/server/turnstile";
 import type { Voter } from "@/lib/types";
@@ -12,7 +14,7 @@ export const runtime = "nodejs";
 
 const INVALID = "That email and code don't match our voter list. Check your invitation email.";
 
-export async function POST(request: Request, { params }: { params: { slug: string } }) {
+async function handlePost(request: Request, { params }: { params: { slug: string } }) {
   const election = await getElectionBySlug(params.slug);
   if (!election || election.status !== "published") {
     return NextResponse.json({ error: "Election not found." }, { status: 404 });
@@ -30,7 +32,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
   const ip = clientIp();
-  const ipLimit = await rateLimit(`voter-auth-ip:${ip}`, 30, 15 * 60 * 1000);
+  const ipLimit = await rateLimit(RATE_KEYS.voterAuthIp(ip), 30, 15 * 60 * 1000);
   if (!ipLimit.ok) return NextResponse.json({ error: retryMessage(ipLimit.retryAfterMs) }, { status: 429 });
 
   let voterSnap;
@@ -48,7 +50,7 @@ export async function POST(request: Request, { params }: { params: { slug: strin
     const code = normalizeCode(String(body.code ?? ""));
     if (!email || code.length !== 8) return NextResponse.json({ error: INVALID }, { status: 400 });
 
-    const emailLimit = await rateLimit(`voter-auth-email:${election.id}:${email}`, 5, 15 * 60 * 1000);
+    const emailLimit = await rateLimit(RATE_KEYS.voterAuthEmail(election.id, email), 5, 15 * 60 * 1000);
     if (!emailLimit.ok) return NextResponse.json({ error: retryMessage(emailLimit.retryAfterMs) }, { status: 429 });
     if (!(await verifyTurnstile(body.turnstileToken, ip))) {
       return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
@@ -75,3 +77,5 @@ export async function POST(request: Request, { params }: { params: { slug: strin
   await setVoterSession(election.id, voterSnap.id);
   return NextResponse.json({ ok: true, voter: { display: maskName(voter.name, voter.email) } });
 }
+
+export const POST = withErrorLog("api: voter sign-in", handlePost);

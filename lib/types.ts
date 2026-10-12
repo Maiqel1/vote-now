@@ -1,3 +1,5 @@
+import type { LimitOverrides } from "./plans";
+
 export type Role = "owner" | "admin" | "observer";
 export type ResultsVisibility = "live" | "afterClose" | "manual" | "private";
 export type PositionType = "single" | "multi" | "yesno";
@@ -49,6 +51,7 @@ export interface Election {
   inviteMessage: string;
   counts: { voters: number; invited: number };
   piiPurgedAt: number | null;
+  limits?: LimitOverrides;
   createdAt: number;
   updatedAt: number;
 }

@@ -6,7 +6,7 @@ import { getEffectiveStatus } from "@/lib/election-status";
 import { loadElectionPage } from "@/lib/server/page";
 
 export default async function ElectionLayout({ children, params }: { children: React.ReactNode; params: { id: string } }) {
-  const { election, role } = await loadElectionPage(params.id);
+  const { election, role, support } = await loadElectionPage(params.id);
   const status = getEffectiveStatus(election);
 
   return (
@@ -18,7 +18,13 @@ export default async function ElectionLayout({ children, params }: { children: R
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap items-center gap-2">
             <StatusBadge status={status} />
-            {role === "observer" && <Badge variant="blue">Observer · read-only</Badge>}
+            {support ? (
+              <Link href={`/admin/elections/${election.id}`}>
+                <Badge variant="amber">Support view · read-only</Badge>
+              </Link>
+            ) : (
+              role === "observer" && <Badge variant="blue">Observer · read-only</Badge>
+            )}
           </div>
           <h1 className="truncate text-2xl font-bold md:text-3xl">{election.title}</h1>
           <p className="text-sm text-muted-foreground">{election.orgName}</p>

@@ -18,7 +18,7 @@ import {
   sendInvitationsChunk,
   startReminderRound,
 } from "@/lib/actions/invitations";
-import { FREE_PLAN } from "@/lib/plans";
+import type { PlanLimits } from "@/lib/plans";
 
 export interface InvitationStats {
   notSent: number;
@@ -46,8 +46,10 @@ export function InvitationsPanel({
   remindersAllowed,
   reminderRound,
   emailsLeftToday,
+  limits,
 }: {
   electionId: string;
+  limits: PlanLimits;
   stats: InvitationStats;
   message: string;
   canEdit: boolean;
@@ -237,7 +239,7 @@ export function InvitationsPanel({
             <div className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-border bg-muted/50 p-4">
               <div>
                 <div className="text-sm font-medium">
-                  Reminders · round {Math.min(reminderRound + (stats.reminderDue > 0 ? 0 : 1), FREE_PLAN.reminderRounds)} of {FREE_PLAN.reminderRounds}
+                  Reminders · round {Math.min(reminderRound + (stats.reminderDue > 0 ? 0 : 1), limits.reminderRounds)} of {limits.reminderRounds}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   Emails a fresh link to invited voters who haven&apos;t voted. Available while voting is open.
@@ -250,7 +252,7 @@ export function InvitationsPanel({
               ) : (
                 <Button
                   variant="outline"
-                  disabled={!canSend || busy || !remindersAllowed || reminderRound >= FREE_PLAN.reminderRounds}
+                  disabled={!canSend || busy || !remindersAllowed || reminderRound >= limits.reminderRounds}
                   onClick={startReminders}
                 >
                   Send reminders
@@ -258,7 +260,7 @@ export function InvitationsPanel({
               )}
             </div>
             <p className="text-xs text-muted-foreground">
-              Platform emails left today: {emailsLeftToday}. Each voter can receive up to {FREE_PLAN.invitesPerVoter} emails in total.
+              Platform emails left today: {emailsLeftToday}. Each voter can receive up to {limits.invitesPerVoter} emails in total.
             </p>
           </section>
         )}

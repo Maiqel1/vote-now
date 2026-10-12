@@ -5,6 +5,7 @@ import { isEmailVerified } from "@/lib/auth/session";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { emailsRemainingToday } from "@/lib/server/email-quota";
 import { votersCol } from "@/lib/server/elections";
+import { limitsForElection } from "@/lib/server/limits";
 import { loadElectionPage } from "@/lib/server/page";
 import type { Voter } from "@/lib/types";
 
@@ -17,10 +18,11 @@ export default async function InvitationsPage({ params }: { params: { id: string
     return <Notice tone="info">Voter data for this election was deleted.</Notice>;
   }
 
-  const [snap, verified, emailsLeftToday] = await Promise.all([
+  const [snap, verified, emailsLeftToday, limits] = await Promise.all([
     votersCol(election.id).select("invite", "hasVoted").get(),
     isEmailVerified(user.uid),
     emailsRemainingToday(),
+    limitsForElection(election),
   ]);
 
   const stats: InvitationStats = { notSent: 0, sent: 0, printed: 0, failed: 0, reminderDue: 0, voted: 0, total: snap.size };
@@ -62,6 +64,7 @@ export default async function InvitationsPage({ params }: { params: { id: string
   return (
     <InvitationsPanel
       electionId={election.id}
+      limits={limits}
       stats={stats}
       message={election.inviteMessage}
       canEdit={canEdit}

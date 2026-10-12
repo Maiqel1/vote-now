@@ -134,3 +134,21 @@ describe("legacy 2025 tallies", () => {
     await assertFails(setDoc(doc(anon, "votes", "president"), { "1": 9999 }));
   });
 });
+
+describe("admin console data", () => {
+  it("is never readable or writable from the client", async () => {
+    const owner = env.authenticatedContext("owner").firestore();
+    const anon = env.unauthenticatedContext().firestore();
+    for (const path of [
+      ["adminAudit", "a1"],
+      ["config", "platform"],
+      ["errorLog", "x1"],
+      ["adminNotes", "user_owner"],
+    ] as const) {
+      await assertFails(getDoc(doc(owner, path[0], path[1])));
+      await assertFails(getDoc(doc(anon, path[0], path[1])));
+      await assertFails(setDoc(doc(owner, path[0], path[1]), { text: "x" }));
+    }
+    await assertFails(getDocs(collection(owner, "adminAudit")));
+  });
+});

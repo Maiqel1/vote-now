@@ -6,9 +6,9 @@ import { formatCode } from "../crypto";
 import { getEffectiveStatus } from "../election-status";
 import { adminDb } from "../firebase-admin";
 import { appUrl } from "../format";
-import { FREE_PLAN } from "../plans";
 import { logAudit } from "../server/audit";
 import { electionDoc, votersCol } from "../server/elections";
+import { limitsForElection } from "../server/limits";
 import { invitedDelta, newCredentials } from "../server/invitations";
 import type { ActionResult, Election, Voter } from "../types";
 import { voterInputSchema } from "../validation";
@@ -68,7 +68,8 @@ export async function addVoters(
       accepted.push(parsed.data);
     });
 
-    const room = Math.max(0, FREE_PLAN.votersPerElection - existing.size);
+    const { votersPerElection } = await limitsForElection(election);
+    const room = Math.max(0, votersPerElection - existing.size);
     const toAdd = accepted.slice(0, room);
     report.overLimit = accepted.length - toAdd.length;
 
@@ -183,7 +184,8 @@ export async function generatePrintSlips(electionId: string, voterIds: string[])
     const { election, actor } = await requireElection(electionId, "admin");
     const blocked = assertEditable(election);
     if (blocked) return fail(blocked);
-    const ids = Array.from(new Set(voterIds)).slice(0, FREE_PLAN.votersPerElection);
+    const { votersPerElection } = await limitsForElection(election);
+    const ids = Array.from(new Set(voterIds)).slice(0, votersPerElection);
     if (ids.length === 0) return fail("Select at least one voter.");
 
     const db = adminDb();

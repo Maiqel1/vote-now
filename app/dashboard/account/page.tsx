@@ -2,14 +2,15 @@ import Link from "next/link";
 import { AccountForm } from "@/components/dashboard/AccountForm";
 import { Badge } from "@/components/ui/badge";
 import { isEmailVerified, requireUser } from "@/lib/auth/session";
-import { FREE_PLAN } from "@/lib/plans";
+import { isCustomPlan } from "@/lib/plans";
 import { countActiveElections } from "@/lib/server/elections";
+import { limitsForUser } from "@/lib/server/limits";
 
 export const metadata = { title: "Account" };
 
 export default async function AccountPage() {
   const user = await requireUser("/dashboard/account");
-  const [verified, active] = await Promise.all([isEmailVerified(user.uid), countActiveElections(user.uid)]);
+  const [verified, active, limits] = await Promise.all([isEmailVerified(user.uid), countActiveElections(user.uid), limitsForUser(user.uid)]);
 
   return (
     <main className="mx-auto max-w-2xl space-y-6 px-4 pt-10 md:px-6">
@@ -35,17 +36,17 @@ export default async function AccountPage() {
       <section className="surface space-y-3 rounded-2xl p-6">
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-bold">Plan</h2>
-          <Badge variant="amber">Free</Badge>
+          <Badge variant="amber">{isCustomPlan(limits) ? "Custom" : "Free"}</Badge>
         </div>
         <ul className="space-y-1.5 text-sm text-muted-foreground">
           <li>
-            {active} of {FREE_PLAN.activeElections} active elections in use
+            {active} of {limits.activeElections} active elections in use
           </li>
-          <li>Up to {FREE_PLAN.votersPerElection} voters per election</li>
+          <li>Up to {limits.votersPerElection.toLocaleString()} voters per election</li>
           <li>
-            {FREE_PLAN.positionsPerElection} positions and {FREE_PLAN.candidatesPerElection} candidates per election
+            {limits.positionsPerElection} positions and {limits.candidatesPerElection} candidates per election
           </li>
-          <li>{FREE_PLAN.reminderRounds} reminder rounds per election</li>
+          <li>{limits.reminderRounds} reminder rounds per election</li>
         </ul>
       </section>
     </main>

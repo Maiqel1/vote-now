@@ -14,7 +14,7 @@ import { TBody, TD, TH, THead, TR, Table } from "@/components/ui/table";
 import { resendInvitation } from "@/lib/actions/invitations";
 import { generatePrintSlips, removeVoters, type PrintSlip } from "@/lib/actions/voters";
 import { downloadFile, toCsv } from "@/lib/client/voter-import";
-import { FREE_PLAN } from "@/lib/plans";
+import type { PlanLimits } from "@/lib/plans";
 import type { VoterRow } from "@/lib/types";
 import { AddVotersDialog } from "./AddVotersDialog";
 import { EditVoterDialog } from "./EditVoterDialog";
@@ -57,8 +57,10 @@ export function VotersManager({
   electionTitle,
   orgName,
   entryUrl,
+  limits,
 }: {
   electionId: string;
+  limits: PlanLimits;
   voters: VoterRow[];
   canEdit: boolean;
   editable: boolean;
@@ -172,12 +174,12 @@ export function VotersManager({
           <Button variant="outline" onClick={exportCsv} disabled={voters.length === 0}>
             Export CSV
           </Button>
-          {canEdit && <AddVotersDialog electionId={electionId} disabled={!editable || voters.length >= FREE_PLAN.votersPerElection} />}
+          {canEdit && <AddVotersDialog electionId={electionId} disabled={!editable || voters.length >= limits.votersPerElection} />}
         </div>
       </div>
 
-      {voters.length >= FREE_PLAN.votersPerElection && editable && (
-        <Notice tone="warning">You&apos;ve reached the free plan limit of {FREE_PLAN.votersPerElection} voters for this election.</Notice>
+      {voters.length >= limits.votersPerElection && editable && (
+        <Notice tone="warning">You&apos;ve reached this election&apos;s limit of {limits.votersPerElection.toLocaleString()} voters.</Notice>
       )}
 
       {canEdit && selectedRows.length > 0 && (
@@ -280,7 +282,7 @@ export function VotersManager({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {voters.length} of {FREE_PLAN.votersPerElection} voters. Names and emails are only visible to you and your team.
+        {voters.length} of {limits.votersPerElection} voters. Names and emails are only visible to you and your team.
       </p>
 
       <EditVoterDialog electionId={electionId} voter={editing} onClose={() => setEditing(null)} />

@@ -1,9 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { canPublishResultsManually, getEffectiveStatus } from "../election-status";
+import { getEffectiveStatus } from "../election-status";
 import { adminDb } from "../firebase-admin";
-import { FREE_PLAN } from "../plans";
 import { logAudit, logAuditIn } from "../server/audit";
 import {
   ballotDoc,
@@ -25,7 +24,16 @@ import {
   visibilitySchema,
 } from "../validation";
 import { isAllowedImageUrl } from "../image-url";
-import { copyImageToElection, deleteElectionImages } from "../server/cloudinary";
+import { copyImageToElection } from "../server/cloudinary";
+import {
+  assertElectionsOpen,
+  closeVotingOp,
+  deleteElectionOp,
+  extendVotingOp,
+  publishResultsOp,
+  setPausedOp,
+} from "../server/election-ops";
+import { limitsForUser } from "../server/limits";
 import { ActionError, actorOf, fail, ok, requireActionUser, requireElection, run, zodMessage } from "./guard";
 
 class SlugTaken extends Error {}
@@ -39,9 +47,10 @@ async function assertUnderActiveLimit(uid: string, excludeElectionId?: string) {
   const snap = await electionsCol().where("ownerId", "==", uid).get();
   const now = Date.now();
   const active = snap.docs.filter((d) => d.id !== excludeElectionId && (d.data().endsAt as number) > now).length;
-  if (active >= FREE_PLAN.activeElections) {
+  const { activeElections } = await limitsForUser(uid);
+  if (active >= activeElections) {
     throw new ActionError(
-      `The free plan allows ${FREE_PLAN.activeElections} active elections at a time. Delete a draft or wait for one to close.`,
+      `Your plan allows ${activeElections} active election${activeElections === 1 ? "" : "s"} at a time. Delete a draft or wait for one to close.`,
     );
   }
 }
@@ -66,6 +75,7 @@ export async function createElection(input: unknown): Promise<ActionResult<{ id:
     const schedule = scheduleSchema.safeParse(data);
     if (!schedule.success) return fail(zodMessage(schedule.error));
     if (RESERVED_SLUGS.has(data.slug)) return fail("That URL is reserved. Choose another.");
+    await assertElectionsOpen();
     await assertUnderActiveLimit(user.uid);
 
     const db = adminDb();
@@ -242,11 +252,7 @@ export async function unpublishElection(electionId: string): Promise<ActionResul
 export async function setPaused(electionId: string, paused: boolean): Promise<ActionResult> {
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "admin");
-    const status = getEffectiveStatus(election);
-    if (paused && status !== "open") return fail("Voting isn't open.");
-    if (!paused && status !== "paused") return fail("Voting isn't paused.");
-    await electionDoc(electionId).update({ paused, updatedAt: Date.now() });
-    await logAudit(electionId, actor, paused ? "voting.paused" : "voting.resumed");
+    await setPausedOp(election, actor, paused);
     refresh(electionId);
     return ok();
   });
@@ -255,16 +261,7 @@ export async function setPaused(electionId: string, paused: boolean): Promise<Ac
 export async function closeVotingEarly(electionId: string): Promise<ActionResult> {
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "admin");
-    const status = getEffectiveStatus(election);
-    if (status !== "open" && status !== "paused") return fail("Voting isn't open.");
-    const now = Date.now();
-    await electionDoc(electionId).update({
-      endsAt: now,
-      paused: false,
-      lockedAt: election.lockedAt ?? now,
-      updatedAt: now,
-    });
-    await logAudit(electionId, actor, "voting.closed_early", { originalEndsAt: election.endsAt });
+    await closeVotingOp(election, actor);
     refresh(electionId);
     return ok();
   });
@@ -297,12 +294,7 @@ export async function startVotingNow(electionId: string, endsAt: number): Promis
 export async function extendVoting(electionId: string, newEndsAt: number): Promise<ActionResult> {
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "admin");
-    const status = getEffectiveStatus(election);
-    if (status !== "open" && status !== "paused") return fail("Voting can only be extended while it's open.");
-    if (!Number.isFinite(newEndsAt) || newEndsAt <= election.endsAt) return fail("Choose a later closing time.");
-    if (newEndsAt - election.startsAt > 1000 * 60 * 60 * 24 * 31) return fail("Voting can stay open for at most 31 days.");
-    await electionDoc(electionId).update({ endsAt: newEndsAt, updatedAt: Date.now() });
-    await logAudit(electionId, actor, "voting.extended", { from: election.endsAt, to: newEndsAt });
+    await extendVotingOp(election, actor, newEndsAt);
     refresh(electionId);
     return ok();
   });
@@ -311,9 +303,7 @@ export async function extendVoting(electionId: string, newEndsAt: number): Promi
 export async function publishResults(electionId: string): Promise<ActionResult> {
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "admin");
-    if (!canPublishResultsManually(election)) return fail("Results can be published once voting has closed.");
-    await electionDoc(electionId).update({ "results.publishedAt": Date.now(), updatedAt: Date.now() });
-    await logAudit(electionId, actor, "results.published");
+    await publishResultsOp(election, actor);
     refresh(electionId);
     revalidatePath(`/e/${election.slug}`, "layout");
     return ok();
@@ -323,6 +313,7 @@ export async function publishResults(electionId: string): Promise<ActionResult> 
 export async function duplicateElection(electionId: string, copyVoters: boolean): Promise<ActionResult<{ id: string }>> {
   return run(async () => {
     const { election, user, actor } = await requireElection(electionId, "admin");
+    await assertElectionsOpen();
     await assertUnderActiveLimit(user.uid);
     const db = adminDb();
     const ballot = await getBallot(electionId);
@@ -429,13 +420,7 @@ export async function deleteElection(electionId: string, confirmTitle: string): 
   return run(async () => {
     const { election } = await requireElection(electionId, "owner");
     if (confirmTitle.trim() !== election.title) return fail("Type the election title exactly to confirm.");
-    const db = adminDb();
-    await db.recursiveDelete(electionDoc(electionId));
-    await db.collection("slugs").doc(election.slug).delete();
-    const invites = await db.collection("teamInvites").where("electionId", "==", electionId).get();
-    await Promise.all(invites.docs.map((d) => d.ref.delete()));
-    await deleteElectionImages(electionId);
-    revalidatePath("/dashboard");
+    await deleteElectionOp(election);
     return ok();
   });
 }

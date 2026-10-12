@@ -135,3 +135,34 @@ ${button(link, "Accept invitation")}
   const text = `${inviterName} invited you to join ${election.title} (${election.orgName}) on VoteNow as ${roleLabel}.\n\nAccept: ${link}\n\nThe invitation expires in 7 days.`;
   return { subject, html, text };
 }
+
+export function accountLinkEmail(params: { kind: "reset" | "verify"; link: string; name: string }): RenderedEmail {
+  const { kind, link, name } = params;
+  const greeting = name ? `Hi ${escapeHtml(name)},` : "Hi,";
+  const subject = kind === "reset" ? "Reset your VoteNow password" : "Verify your VoteNow email address";
+  const intro =
+    kind === "reset"
+      ? "VoteNow support created a link for you to set a new password."
+      : "VoteNow support created a link for you to verify your email address.";
+  const html = layout(
+    `<p style="margin:0 0 12px;">${greeting}</p>
+<p style="margin:0 0 12px;">${intro}</p>
+${button(link, kind === "reset" ? "Set a new password" : "Verify my email")}
+<p style="margin:0;color:#71717a;font-size:13px;">The link works once and expires after a short time.</p>`,
+    `If you didn't ask VoteNow support for this, you can ignore this email.`,
+  );
+  const text = `${name ? `Hi ${name},` : "Hi,"}\n\n${intro}\n\n${link}\n\nThe link works once and expires after a short time.`;
+  return { subject, html, text };
+}
+
+export function testEmail(params: { environment: string; sentBy: string }): RenderedEmail {
+  const sentAt = new Date().toUTCString();
+  const subject = `VoteNow test email (${params.environment})`;
+  const html = layout(
+    `<p style="margin:0 0 12px;">This is a test email from the VoteNow admin console.</p>
+<p style="margin:0;color:#71717a;font-size:13px;">Environment: ${escapeHtml(params.environment)}<br/>Sent by: ${escapeHtml(params.sentBy)}<br/>Sent at: ${escapeHtml(sentAt)}</p>`,
+    `If it arrived, email delivery is working.`,
+  );
+  const text = `This is a test email from the VoteNow admin console.\n\nEnvironment: ${params.environment}\nSent by: ${params.sentBy}\nSent at: ${sentAt}`;
+  return { subject, html, text };
+}

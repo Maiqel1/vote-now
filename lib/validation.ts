@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { FREE_PLAN } from "./plans";
+import { LIMIT_CEILINGS } from "./plans";
 import type { Ballot, Selections } from "./types";
 
 export const ABSTAIN = "abstain";
@@ -70,7 +70,7 @@ const positionSchema = z
     type: z.enum(["single", "multi", "yesno"]),
     maxSelections: z.number().int().min(1).max(50),
     allowAbstain: z.boolean(),
-    candidates: z.array(candidateSchema).max(FREE_PLAN.candidatesPerElection),
+    candidates: z.array(candidateSchema).max(LIMIT_CEILINGS.candidatesPerElection),
   })
   .superRefine((p, ctx) => {
     if (p.type === "yesno" && p.candidates.length > 1) {
@@ -83,12 +83,12 @@ const positionSchema = z
 
 export const ballotSchema = z
   .object({
-    positions: z.array(positionSchema).max(FREE_PLAN.positionsPerElection, `At most ${FREE_PLAN.positionsPerElection} positions`),
+    positions: z.array(positionSchema).max(LIMIT_CEILINGS.positionsPerElection, `At most ${LIMIT_CEILINGS.positionsPerElection} positions`),
   })
   .superRefine((b, ctx) => {
     const total = b.positions.reduce((n, p) => n + p.candidates.length, 0);
-    if (total > FREE_PLAN.candidatesPerElection) {
-      ctx.addIssue({ code: "custom", message: `At most ${FREE_PLAN.candidatesPerElection} candidates per election` });
+    if (total > LIMIT_CEILINGS.candidatesPerElection) {
+      ctx.addIssue({ code: "custom", message: `At most ${LIMIT_CEILINGS.candidatesPerElection} candidates per election` });
     }
     const ids = new Set<string>();
     for (const p of b.positions) {

@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
 import { UserMenu } from "@/components/dashboard/UserMenu";
+import { PlatformBanner } from "@/components/PlatformBanner";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { AuroraBackdrop } from "@/components/ui/aurora-background";
 import { requireUser } from "@/lib/auth/session";
+import { isSuperadmin } from "@/lib/auth/superadmin";
 
 export const dynamic = "force-dynamic";
 
@@ -25,10 +27,11 @@ export default async function DashboardLayout({ children }: { children: React.Re
           </div>
           <div className="flex items-center gap-1.5">
             <ThemeToggle />
-            <UserMenu name={user.name} email={user.email} />
+            <UserMenu name={user.name} email={user.email} superadmin={isSuperadmin(user)} />
           </div>
         </div>
       </header>
+      <PlatformBanner />
       {!user.emailVerified && (
         <div className="border-b border-warning/25 bg-warning-soft">
           <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-2 px-4 py-2.5 text-xs text-warning md:px-6">

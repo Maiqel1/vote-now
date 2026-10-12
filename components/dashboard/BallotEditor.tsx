@@ -17,7 +17,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { saveBallot } from "@/lib/actions/ballot";
 import { newClientId } from "@/lib/client/image";
 import { uploadElectionImage } from "@/lib/client/upload";
-import { FREE_PLAN } from "@/lib/plans";
+import type { PlanLimits } from "@/lib/plans";
 import type { Ballot, Candidate, Position, PositionType } from "@/lib/types";
 
 function move<T>(items: T[], from: number, to: number): T[] {
@@ -296,7 +296,17 @@ function PositionEditor({
   );
 }
 
-export function BallotEditor({ electionId, initial, locked }: { electionId: string; initial: Ballot; locked: boolean }) {
+export function BallotEditor({
+  electionId,
+  initial,
+  locked,
+  limits,
+}: {
+  electionId: string;
+  initial: Ballot;
+  locked: boolean;
+  limits: PlanLimits;
+}) {
   const router = useRouter();
   const [positions, setPositions] = useState<Position[]>(initial.positions);
   const [saving, setSaving] = useState(false);
@@ -354,7 +364,7 @@ export function BallotEditor({ electionId, initial, locked }: { electionId: stri
         />
       ))}
 
-      {!locked && positions.length > 0 && positions.length < FREE_PLAN.positionsPerElection && (
+      {!locked && positions.length > 0 && positions.length < limits.positionsPerElection && (
         <Button variant="outline" onClick={() => setPositions((all) => [...all, newPosition()])}>
           + Add position
         </Button>
@@ -366,7 +376,7 @@ export function BallotEditor({ electionId, initial, locked }: { electionId: stri
       >
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-3 px-4 py-3 md:px-6">
           <span className="text-xs text-muted-foreground">
-            {positions.length} of {FREE_PLAN.positionsPerElection} positions · {candidateCount} of {FREE_PLAN.candidatesPerElection} candidates
+            {positions.length} of {limits.positionsPerElection} positions · {candidateCount} of {limits.candidatesPerElection} candidates
             {dirty && <span className="ml-2 text-brand-strong">· Unsaved changes</span>}
           </span>
           <div className="flex gap-2">

@@ -78,3 +78,7 @@ export async function copyImageToElection(url: string | null, electionId: string
     return null;
   }
 }
+
+export async function pingCloudinary(): Promise<void> {
+  await client().api.ping();
+}

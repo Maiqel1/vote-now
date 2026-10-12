@@ -5,11 +5,12 @@ import { isEmailVerified } from "../auth/session";
 import { invitationEmail } from "../email/templates";
 import { getEffectiveStatus } from "../election-status";
 import { adminDb } from "../firebase-admin";
-import { EMAIL_CHUNK_SIZE, FREE_PLAN } from "../plans";
+import { EMAIL_CHUNK_SIZE } from "../plans";
 import { logAudit } from "../server/audit";
 import { reserveEmails } from "../server/email-quota";
 import { electionDoc, votersCol } from "../server/elections";
 import { deliverCredentials } from "../server/invitations";
+import { limitsForElection } from "../server/limits";
 import type { ActionResult, Election, Voter } from "../types";
 import { ActionError, fail, ok, requireElection, run } from "./guard";
 
@@ -71,10 +72,11 @@ export async function sendInvitationsChunk(
         ? votersCol(electionId).where("invite.status", "==", "notSent")
         : votersCol(electionId).where("invite.reminderDue", "==", true);
 
+    const { invitesPerVoter } = await limitsForElection(election);
     const snap = await base.limit(EMAIL_CHUNK_SIZE).get();
-    const overLimit = snap.docs.filter((d) => (d.data() as Voter).invite.count >= FREE_PLAN.invitesPerVoter);
+    const overLimit = snap.docs.filter((d) => (d.data() as Voter).invite.count >= invitesPerVoter);
     const eligible = snap.docs.filter(
-      (d) => (d.data() as Voter).invite.count < FREE_PLAN.invitesPerVoter && !(d.data() as Voter).hasVoted,
+      (d) => (d.data() as Voter).invite.count < invitesPerVoter && !(d.data() as Voter).hasVoted,
     );
     const alreadyVoted = snap.docs.filter((d) => (d.data() as Voter).hasVoted);
 
@@ -84,7 +86,7 @@ export async function sendInvitationsChunk(
         batch.update(d.ref, {
           "invite.status": "failed",
           "invite.reminderDue": false,
-          "invite.lastError": `Limit of ${FREE_PLAN.invitesPerVoter} emails per voter reached`,
+          "invite.lastError": `Limit of ${invitesPerVoter} emails per voter reached`,
         }),
       );
       alreadyVoted.forEach((d) => batch.update(d.ref, { "invite.reminderDue": false }));
@@ -112,8 +114,9 @@ export async function startReminderRound(electionId: string): Promise<ActionResu
     assertCanSend(election);
     const status = getEffectiveStatus(election);
     if (status !== "open" && status !== "paused") return fail("Reminders can be sent while voting is open.");
-    if (election.reminderRound >= FREE_PLAN.reminderRounds) {
-      return fail(`The free plan includes ${FREE_PLAN.reminderRounds} reminder rounds per election.`);
+    const { reminderRounds } = await limitsForElection(election);
+    if (election.reminderRound >= reminderRounds) {
+      return fail(`This election includes ${reminderRounds} reminder round${reminderRounds === 1 ? "" : "s"}.`);
     }
 
     const snap = await votersCol(electionId).where("hasVoted", "==", false).where("invite.status", "==", "sent").get();
@@ -135,9 +138,10 @@ export async function retryFailedInvitations(electionId: string): Promise<Action
   return run(async () => {
     const { election } = await requireElection(electionId, "admin");
     assertCanSend(election);
+    const { invitesPerVoter } = await limitsForElection(election);
     const snap = await votersCol(electionId).where("invite.status", "==", "failed").get();
     const retryable = snap.docs.filter(
-      (d) => !(d.data() as Voter).hasVoted && (d.data() as Voter).invite.count < FREE_PLAN.invitesPerVoter,
+      (d) => !(d.data() as Voter).hasVoted && (d.data() as Voter).invite.count < invitesPerVoter,
     );
     const batch = adminDb().batch();
     retryable.forEach((d) => batch.update(d.ref, { "invite.status": "notSent", "invite.lastError": null }));
@@ -155,8 +159,9 @@ export async function resendInvitation(electionId: string, voterId: string): Pro
     if (!snap.exists) return fail("Voter not found.");
     const voter = snap.data() as Voter;
     if (voter.hasVoted) return fail("This voter has already voted.");
-    if (voter.invite.count >= FREE_PLAN.invitesPerVoter) {
-      return fail(`This voter has already been emailed ${FREE_PLAN.invitesPerVoter} times. Print a slip instead.`);
+    const { invitesPerVoter } = await limitsForElection(election);
+    if (voter.invite.count >= invitesPerVoter) {
+      return fail(`This voter has already been emailed ${invitesPerVoter} times. Print a slip instead.`);
     }
     if ((await reserveEmails(1)) === 0) return fail("The platform's daily email limit has been reached. Try again tomorrow.");
 

@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { signOutEverywhere } from "@/lib/client/session";
 
-export function UserMenu({ name, email }: { name: string; email: string }) {
+export function UserMenu({ name, email, superadmin = false }: { name: string; email: string; superadmin?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -60,6 +60,15 @@ export function UserMenu({ name, email }: { name: string; email: string }) {
           >
             Account
           </Link>
+          {superadmin && (
+            <Link
+              href="/admin"
+              onClick={() => setOpen(false)}
+              className="block rounded-lg px-3 py-2 text-sm font-medium text-brand-strong hover:bg-brand-soft"
+            >
+              Admin console
+            </Link>
+          )}
           <button onClick={signOut} className="block w-full rounded-lg px-3 py-2 text-left text-sm text-danger hover:bg-danger-soft">
             Sign out
           </button>

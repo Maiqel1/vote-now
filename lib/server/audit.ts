@@ -9,6 +9,8 @@ export interface Actor {
 
 export const SYSTEM_ACTOR: Actor = { uid: null, name: "System" };
 
+export const SUPPORT_ACTOR: Actor = { uid: null, name: "VoteNow support" };
+
 function entry(actor: Actor, action: string, meta: Record<string, unknown>) {
   return { actorUid: actor.uid, actorName: actor.name, action, meta, at: Date.now() };
 }

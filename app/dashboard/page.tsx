@@ -7,8 +7,9 @@ import { Progress } from "@/components/ui/progress";
 import { requireUser } from "@/lib/auth/session";
 import { getEffectiveStatus } from "@/lib/election-status";
 import { formatDateTime, pluralize } from "@/lib/format";
-import { FREE_PLAN } from "@/lib/plans";
+import { planLabel } from "@/lib/plans";
 import { electionsCol, getTally, toElection } from "@/lib/server/elections";
+import { limitsForUser } from "@/lib/server/limits";
 import type { EffectiveStatus, Election } from "@/lib/types";
 
 export const metadata = { title: "My elections" };
@@ -54,14 +55,14 @@ function ElectionCard({ election, voted, role }: { election: Election; voted: nu
 
 export default async function DashboardPage() {
   const user = await requireUser("/dashboard");
-  const snap = await electionsCol().where("memberIds", "array-contains", user.uid).get();
+  const [snap, limits] = await Promise.all([electionsCol().where("memberIds", "array-contains", user.uid).get(), limitsForUser(user.uid)]);
   const elections = snap.docs
     .map((d) => toElection(d.id, d.data())!)
     .sort((a, b) => b.createdAt - a.createdAt);
   const tallies = await Promise.all(elections.map((e) => getTally(e.id)));
   const now = Date.now();
   const activeOwned = elections.filter((e) => e.ownerId === user.uid && e.endsAt > now).length;
-  const atLimit = activeOwned >= FREE_PLAN.activeElections;
+  const atLimit = activeOwned >= limits.activeElections;
 
   const groups = ORDER.map((status) => ({
     status,
@@ -76,7 +77,7 @@ export default async function DashboardPage() {
         <div>
           <h1 className="mb-1 text-3xl font-semibold md:text-4xl">Your elections</h1>
           <p className="text-sm text-muted-foreground">
-            Free plan · {activeOwned} of {FREE_PLAN.activeElections} active elections · up to {FREE_PLAN.votersPerElection} voters each
+            {planLabel(limits)} · {activeOwned} of {limits.activeElections} active elections · up to {limits.votersPerElection.toLocaleString()} voters each
           </p>
         </div>
         {atLimit ? (

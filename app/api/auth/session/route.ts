@@ -1,6 +1,9 @@
 import { NextResponse } from "next/server";
 import { SESSION_COOKIE, SESSION_MAX_AGE_MS } from "@/lib/auth/session";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { RATE_KEYS } from "@/lib/rate-limit-keys";
+import { withErrorLog } from "@/lib/server/error-log";
+import { getPlatformConfig } from "@/lib/server/platform-config";
 import { clientIp, rateLimit } from "@/lib/server/rate-limit";
 import { verifyTurnstile } from "@/lib/server/turnstile";
 
@@ -8,9 +11,9 @@ export const runtime = "nodejs";
 
 const MAX_SIGN_IN_AGE_SECONDS = 60 * 60;
 
-export async function POST(request: Request) {
+async function handlePost(request: Request) {
   const ip = clientIp();
-  const limit = await rateLimit(`session:${ip}`, 30, 10 * 60 * 1000);
+  const limit = await rateLimit(RATE_KEYS.session(ip), 30, 10 * 60 * 1000);
   if (!limit.ok) return NextResponse.json({ error: "Too many sign-in attempts. Try again shortly." }, { status: 429 });
 
   const body = (await request.json().catch(() => null)) as {
@@ -34,6 +37,9 @@ export async function POST(request: Request) {
   const userRef = adminDb().collection("users").doc(decoded.uid);
   const existing = await userRef.get();
   if (!existing.exists) {
+    if (!(await getPlatformConfig()).signupsOpen) {
+      return NextResponse.json({ error: "New sign-ups are paused right now. Please try again later." }, { status: 403 });
+    }
     const human = await verifyTurnstile(body.turnstileToken, ip);
     if (!human) return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
     await userRef.set({
@@ -55,6 +61,8 @@ export async function POST(request: Request) {
   });
   return response;
 }
+
+export const POST = withErrorLog("api: sign-in session", handlePost);
 
 export async function DELETE() {
   const response = NextResponse.json({ ok: true });

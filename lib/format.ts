@@ -50,3 +50,31 @@ export function slugify(value: string): string {
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${count.toLocaleString()} ${count === 1 ? singular : plural}`;
 }
+
+const MINUTE_MS = 60 * 1000;
+const HOUR_MS = 60 * MINUTE_MS;
+const DAY_IN_MS = 24 * HOUR_MS;
+
+export function timeAgo(ms: number | null | undefined, now = Date.now()): string {
+  if (!ms) return "never";
+  const diff = now - ms;
+  const abs = Math.abs(diff);
+  const units: [number, string][] = [
+    [365 * DAY_IN_MS, "y"],
+    [30 * DAY_IN_MS, "mo"],
+    [DAY_IN_MS, "d"],
+    [HOUR_MS, "h"],
+    [MINUTE_MS, "m"],
+  ];
+  for (const [size, label] of units) {
+    if (abs >= size) {
+      const n = Math.floor(abs / size);
+      return diff < 0 ? `in ${n}${label}` : `${n}${label} ago`;
+    }
+  }
+  return diff < 0 ? "in under a minute" : "just now";
+}
+
+export function compactNumber(value: number): string {
+  return new Intl.NumberFormat("en", { notation: "compact", maximumFractionDigits: 1 }).format(value);
+}

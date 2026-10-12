@@ -31,3 +31,7 @@ export const smtpTransport: EmailTransport = async (email) => {
     replyTo: email.replyTo,
   });
 };
+
+export async function verifySmtp(): Promise<void> {
+  await getTransporter().verify();
+}

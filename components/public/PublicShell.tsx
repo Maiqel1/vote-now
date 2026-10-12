@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { Logo } from "@/components/brand/Logo";
+import { PlatformBanner } from "@/components/PlatformBanner";
 import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { AuroraBackdrop } from "@/components/ui/aurora-background";
 import { FloatingNavbar } from "@/components/ui/floating-navbar";
@@ -45,7 +46,10 @@ export function PublicShell({
           </>
         }
       />
-      <div className="relative mx-auto max-w-3xl px-4 pt-28 md:px-6">{children}</div>
+      <div className="relative mx-auto max-w-3xl px-4 pt-28 md:px-6">
+        <PlatformBanner variant="card" />
+        {children}
+      </div>
       <footer className="mx-auto mt-16 flex max-w-3xl items-center justify-between px-4 text-xs text-muted-foreground md:px-6">
         <span>Secure voting by</span>
         <Logo />

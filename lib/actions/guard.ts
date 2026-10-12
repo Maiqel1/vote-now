@@ -2,6 +2,7 @@ import "server-only";
 import type { ZodError } from "zod";
 import { getCurrentUser, type SessionUser } from "../auth/session";
 import type { Actor } from "../server/audit";
+import { logActionError } from "../server/error-log";
 import { getElectionAccess } from "../server/elections";
 import type { ActionResult, Election, Role } from "../types";
 
@@ -51,6 +52,7 @@ export async function run<T>(fn: () => Promise<ActionResult<T>>): Promise<Action
   } catch (error) {
     if (error instanceof ActionError) return fail(error.message);
     console.error(error);
+    await logActionError(error);
     return fail("Something went wrong. Please try again.");
   }
 }

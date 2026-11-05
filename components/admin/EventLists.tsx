@@ -35,11 +35,15 @@ const ADMIN_LABELS: Record<string, string> = {
   "platform.settings_updated": "changed platform settings",
   "email.test_sent": "sent a test email",
   "email.test_failed": "tried a test email (failed)",
+  "poll.ended": "ended a poll",
+  "poll.removed": "removed a poll",
+  "poll.restored": "restored a poll",
 };
 
 function targetHref(entry: AdminAuditEntry): string | null {
   if (entry.target.type === "user" && entry.action !== "user.deleted") return `/admin/users/${entry.target.id}`;
   if (entry.target.type === "election" && entry.action !== "election.deleted") return `/admin/elections/${entry.target.id}`;
+  if (entry.target.type === "poll") return `/admin/polls?q=${entry.target.id}`;
   if (entry.target.type === "voter") return `/admin/voters?email=${encodeURIComponent(entry.target.label ?? "")}`;
   return null;
 }

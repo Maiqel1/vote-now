@@ -52,7 +52,7 @@ async function handlePost(request: Request, { params }: { params: { slug: string
 
     const emailLimit = await rateLimit(RATE_KEYS.voterAuthEmail(election.id, email), 5, 15 * 60 * 1000);
     if (!emailLimit.ok) return NextResponse.json({ error: retryMessage(emailLimit.retryAfterMs) }, { status: 429 });
-    if (!(await verifyTurnstile(body.turnstileToken, ip))) {
+    if (!(await verifyTurnstile(body.turnstileToken, ip, "voter_sign_in"))) {
       return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
     }
 

@@ -97,7 +97,7 @@ function LoginForm() {
           />
         </div>
 
-        <TurnstileField ref={turnstile} onToken={setTurnstileToken} />
+        <TurnstileField ref={turnstile} action="account" onToken={setTurnstileToken} />
         {error && <Notice tone="error">{error}</Notice>}
 
         <Button type="submit" className="h-11 w-full" disabled={loading !== null || blocked}>

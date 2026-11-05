@@ -109,7 +109,13 @@ describe("rate limit keys", () => {
       "resend-email:e1:ada@example.com",
       "vote:e1:v1",
     ]);
-    expect(ipRateKeys(" 1.2.3.4 ")).toEqual(["session:1.2.3.4", "voter-auth-ip:1.2.3.4", "resend-ip:1.2.3.4", "receipt:1.2.3.4"]);
+    expect(ipRateKeys(" 1.2.3.4 ")).toEqual([
+      "session:1.2.3.4",
+      "voter-auth-ip:1.2.3.4",
+      "resend-ip:1.2.3.4",
+      "receipt:1.2.3.4",
+      "poll-create:1.2.3.4",
+    ]);
   });
 });
 

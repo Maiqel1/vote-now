@@ -2,7 +2,7 @@ import "server-only";
 import type { SessionUser } from "../auth/session";
 import { adminDb } from "../firebase-admin";
 
-export type AdminTargetType = "user" | "election" | "voter" | "ip" | "platform" | "email";
+export type AdminTargetType = "user" | "election" | "voter" | "ip" | "platform" | "email" | "poll";
 
 export interface AdminTarget {
   type: AdminTargetType;

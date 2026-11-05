@@ -152,3 +152,19 @@ describe("admin console data", () => {
     await assertFails(getDocs(collection(owner, "adminAudit")));
   });
 });
+
+describe("instant polls", () => {
+  it("are never readable or writable from the client", async () => {
+    const owner = env.authenticatedContext("owner").firestore();
+    const anon = env.unauthenticatedContext().firestore();
+    for (const db of [owner, anon]) {
+      await assertFails(getDoc(doc(db, "polls", "abcd1234")));
+      await assertFails(getDoc(doc(db, "polls", "abcd1234", "pollShards", "0")));
+      await assertFails(getDoc(doc(db, "polls", "abcd1234", "voteKeys", "k1")));
+      await assertFails(getDocs(collection(db, "polls")));
+      await assertFails(setDoc(doc(db, "polls", "abcd1234"), { question: "x" }));
+      await assertFails(setDoc(doc(db, "polls", "abcd1234", "pollShards", "0"), { total: 1000 }));
+      await assertFails(setDoc(doc(db, "polls", "abcd1234", "voteKeys", "k1"), { expiresAt: 1 }));
+    }
+  });
+});

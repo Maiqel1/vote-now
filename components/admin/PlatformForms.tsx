@@ -43,6 +43,7 @@ export function SettingsForm({ config, envCap }: { config: PlatformConfig; envCa
   const { busy, perform } = useAdminAction();
   const [signupsOpen, setSignupsOpen] = useState(config.signupsOpen);
   const [electionsOpen, setElectionsOpen] = useState(config.electionsOpen);
+  const [pollsOpen, setPollsOpen] = useState(config.pollsOpen);
   const [bannerMessage, setBannerMessage] = useState(config.banner?.message ?? "");
   const [bannerTone, setBannerTone] = useState<"info" | "warning">(config.banner?.tone ?? "info");
   const [cap, setCap] = useState(config.emailDailyCap === null ? "" : String(config.emailDailyCap));
@@ -54,6 +55,7 @@ export function SettingsForm({ config, envCap }: { config: PlatformConfig; envCa
         savePlatformSettings({
           signupsOpen,
           electionsOpen,
+          pollsOpen,
           bannerMessage,
           bannerTone,
           emailDailyCap: cap.trim() === "" ? null : Number(cap),
@@ -78,6 +80,13 @@ export function SettingsForm({ config, envCap }: { config: PlatformConfig; envCa
           description="When off, nobody can create or duplicate an election. Existing elections keep running."
           checked={electionsOpen}
           onChange={setElectionsOpen}
+        />
+        <ToggleRow
+          id="polls"
+          label="New instant polls"
+          description="When off, nobody can create a poll. Polls already running keep taking votes."
+          checked={pollsOpen}
+          onChange={setPollsOpen}
         />
       </div>
 

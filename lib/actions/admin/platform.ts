@@ -16,6 +16,7 @@ import { fail, ok, run, zodMessage } from "../guard";
 const settingsSchema = z.object({
   signupsOpen: z.boolean(),
   electionsOpen: z.boolean(),
+  pollsOpen: z.boolean(),
   bannerMessage: z.string().trim().max(MAX_BANNER_LENGTH, `Keep the banner under ${MAX_BANNER_LENGTH} characters`),
   bannerTone: z.enum(["info", "warning"]),
   emailDailyCap: z.number().int().min(0).max(MAX_EMAIL_DAILY_CAP).nullable(),

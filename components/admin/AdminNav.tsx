@@ -1,6 +1,6 @@
 "use client";
 
-import { Activity, AlertTriangle, BarChart3, Mail, Search, Server, Settings, Users, Vote } from "lucide-react";
+import { Activity, AlertTriangle, BarChart3, ListChecks, Mail, Search, Server, Settings, Users, Vote } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -9,6 +9,7 @@ const ITEMS = [
   { href: "/admin", label: "Overview", icon: BarChart3 },
   { href: "/admin/users", label: "Users", icon: Users },
   { href: "/admin/elections", label: "Elections", icon: Vote },
+  { href: "/admin/polls", label: "Polls", icon: ListChecks },
   { href: "/admin/voters", label: "Voters", icon: Search },
   { href: "/admin/email", label: "Email", icon: Mail },
   { href: "/admin/activity", label: "Activity", icon: Activity },

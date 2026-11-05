@@ -54,6 +54,13 @@ export function UserMenu({ name, email, superadmin = false }: { name: string; em
             My elections
           </Link>
           <Link
+            href="/dashboard/polls"
+            onClick={() => setOpen(false)}
+            className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-secondary"
+          >
+            My polls
+          </Link>
+          <Link
             href="/dashboard/account"
             onClick={() => setOpen(false)}
             className="block rounded-lg px-3 py-2 text-sm text-foreground/80 hover:bg-secondary"

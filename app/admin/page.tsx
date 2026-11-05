@@ -7,6 +7,7 @@ import { STATUS_LABELS } from "@/lib/election-status";
 import { compactNumber, timeAgo } from "@/lib/format";
 import { recentInviteFailures } from "@/lib/server/admin/email";
 import { load } from "@/lib/server/admin/load";
+import { pollStats } from "@/lib/server/admin/polls";
 import { blockStats, electionStats, emailStats, limitPressure, userStats, votingStats } from "@/lib/server/admin/overview";
 import type { EffectiveStatus } from "@/lib/types";
 
@@ -15,7 +16,7 @@ export const metadata = { title: "Overview" };
 const STATUS_ORDER: EffectiveStatus[] = ["open", "paused", "scheduled", "draft", "closed"];
 
 export default async function AdminOverviewPage() {
-  const [users, elections, voting, email, blocks, pressure, failures] = await Promise.all([
+  const [users, elections, voting, email, blocks, pressure, failures, polls] = await Promise.all([
     load("user stats", userStats),
     load("election stats", electionStats),
     load("voting stats", votingStats),
@@ -23,6 +24,7 @@ export default async function AdminOverviewPage() {
     load("rate limits", blockStats),
     load("limit pressure", limitPressure),
     load("invite failures", () => recentInviteFailures(8)),
+    load("poll stats", pollStats),
   ]);
   const now = Date.now();
   const blockedNow = blocks.ok ? blocks.data.reduce((sum, b) => sum + b.blocked, 0) : null;
@@ -31,7 +33,7 @@ export default async function AdminOverviewPage() {
     <div className="space-y-6">
       <PageHeader title="Overview" description="Everything happening on VoteNow right now." />
 
-      <div className="grid grid-cols-2 gap-3 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-3 md:grid-cols-4 xl:grid-cols-5">
         <StatTile
           label="Users"
           href="/admin/users"
@@ -78,6 +80,19 @@ export default async function AdminOverviewPage() {
           href="/admin/users?filter=unverified"
           value={users.ok ? users.data.unverified.toLocaleString() : "—"}
           hint={users.ok && users.data.disabled > 0 ? `${users.data.disabled} disabled` : "can't send invitations yet"}
+        />
+        <StatTile
+          label="Instant polls"
+          href="/admin/polls"
+          value={polls.ok ? polls.data.total.toLocaleString() : "—"}
+          hint={polls.ok ? `${polls.data.running} running · +${polls.data.created24h} today · +${polls.data.created7d} this week` : undefined}
+        />
+        <StatTile
+          label="Poll votes"
+          href="/admin/polls"
+          value={polls.ok ? compactNumber(polls.data.votes) : "—"}
+          hint={polls.ok && polls.data.reported > 0 ? `${polls.data.reported} polls reported` : "all time"}
+          tone={polls.ok && polls.data.reported > 0 ? "warning" : "default"}
         />
       </div>
 

@@ -3,6 +3,7 @@ export type BannerTone = "info" | "warning";
 export interface PlatformConfig {
   signupsOpen: boolean;
   electionsOpen: boolean;
+  pollsOpen: boolean;
   banner: { message: string; tone: BannerTone } | null;
   emailDailyCap: number | null;
   updatedAt: number | null;
@@ -12,6 +13,7 @@ export interface PlatformConfig {
 export const DEFAULT_PLATFORM_CONFIG: PlatformConfig = {
   signupsOpen: true,
   electionsOpen: true,
+  pollsOpen: true,
   banner: null,
   emailDailyCap: null,
   updatedAt: null,
@@ -30,6 +32,7 @@ export function parsePlatformConfig(data: unknown): PlatformConfig {
   return {
     signupsOpen: raw.signupsOpen !== false,
     electionsOpen: raw.electionsOpen !== false,
+    pollsOpen: raw.pollsOpen !== false,
     banner: message ? { message, tone: banner?.tone === "warning" ? "warning" : "info" } : null,
     emailDailyCap:
       typeof cap === "number" && Number.isInteger(cap) && cap >= 0 ? Math.min(cap, MAX_EMAIL_DAILY_CAP) : null,

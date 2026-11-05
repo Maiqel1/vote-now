@@ -23,6 +23,9 @@ export default async function DashboardLayout({ children }: { children: React.Re
               <Link href="/dashboard" className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
                 Elections
               </Link>
+              <Link href="/dashboard/polls" className="rounded-md px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:bg-accent hover:text-foreground">
+                Polls
+              </Link>
             </nav>
           </div>
           <div className="flex items-center gap-1.5">

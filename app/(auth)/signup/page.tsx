@@ -123,7 +123,7 @@ function SignupForm() {
           <p className="text-xs text-muted-foreground/70">At least 8 characters.</p>
         </div>
 
-        <TurnstileField ref={turnstile} onToken={setTurnstileToken} />
+        <TurnstileField ref={turnstile} action="account" onToken={setTurnstileToken} />
         {error && <Notice tone="error">{error}</Notice>}
 
         <Button type="submit" className="h-11 w-full" disabled={loading !== null || blocked}>

@@ -21,15 +21,16 @@ const geistMono = localFont({
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
-  title: { default: "VoteNow · Secure online elections", template: "%s · VoteNow" },
+  title: { default: "VoteNow · Online voting for organizations and student unions", template: "%s · VoteNow" },
   description:
-    "Create an election, invite your voters and get results you can trust. Secret ballots, one vote per voter, live turnout.",
+    "Secure online voting for organizations, student unions, schools, clubs and associations. Secret ballots, one vote per voter, live turnout and instant polls. Start free.",
   applicationName: "VoteNow",
   openGraph: {
     type: "website",
     siteName: "VoteNow",
-    title: "VoteNow · Secure online elections",
-    description: "Build the ballot, invite your voters and publish results you can trust. Secret ballots, one vote per voter, live turnout.",
+    title: "VoteNow · Online voting for organizations and student unions",
+    description:
+      "Secure online voting for organizations, student unions, schools, clubs and associations. Secret ballots, one vote per voter, live turnout and instant polls.",
   },
   twitter: { card: "summary_large_image" },
   verification: { google: "izZgC2imvgDy4tRi9AmvQtby16FpRqjR0jUdPlMXwgU" },

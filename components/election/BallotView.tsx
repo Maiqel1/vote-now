@@ -55,7 +55,7 @@ function Bio({ candidate }: { candidate: Candidate }) {
   );
 }
 
-function OptionRow({
+export function OptionRow({
   selected,
   onSelect,
   square,

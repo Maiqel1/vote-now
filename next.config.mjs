@@ -29,7 +29,7 @@ const nextConfig = {
           { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
         ],
       },
-      ...["/e/:path*", "/admin/:path*", "/admin", "/dashboard/:path*", "/dashboard", "/invite/:path*", "/verify-email", "/forgot-password"].map((source) => ({
+      ...["/e/:path*", "/p/:path*", "/admin/:path*", "/admin", "/dashboard/:path*", "/dashboard", "/invite/:path*", "/verify-email", "/forgot-password"].map((source) => ({
         source,
         headers: [{ key: "X-Robots-Tag", value: "noindex, nofollow" }],
       })),

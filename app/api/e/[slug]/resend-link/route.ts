@@ -32,7 +32,7 @@ async function handlePost(request: Request, { params }: { params: { slug: string
   if (!ipLimit.ok) return NextResponse.json({ error: retryMessage(ipLimit.retryAfterMs) }, { status: 429 });
   const emailLimit = await rateLimit(RATE_KEYS.resendEmail(election.id, email), 3, 60 * 60 * 1000);
   if (!emailLimit.ok) return NextResponse.json({ error: retryMessage(emailLimit.retryAfterMs) }, { status: 429 });
-  if (!(await verifyTurnstile(body?.turnstileToken, ip))) {
+  if (!(await verifyTurnstile(body?.turnstileToken, ip, "resend_link"))) {
     return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
   }
 

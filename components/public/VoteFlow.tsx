@@ -247,7 +247,7 @@ export function VoteFlow({
                 onChange={(e) => setCode(e.target.value.toUpperCase())}
               />
             </div>
-            <TurnstileField ref={turnstile} onToken={setTurnstileToken} />
+            <TurnstileField ref={turnstile} action="voter_sign_in" onToken={setTurnstileToken} />
             {error && <Notice tone="error">{error}</Notice>}
             <Button type="submit" className="h-12 w-full rounded-full" disabled={busy || (turnstileConfigured && !turnstileToken)}>
               {busy && <Spinner />}
@@ -276,7 +276,7 @@ export function VoteFlow({
               <Label htmlFor="resend-email">Email address</Label>
               <Input id="resend-email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
             </div>
-            <TurnstileField ref={turnstile} onToken={setTurnstileToken} />
+            <TurnstileField ref={turnstile} action="resend_link" onToken={setTurnstileToken} />
             {error && <Notice tone="error">{error}</Notice>}
             {info && <Notice tone="success">{info}</Notice>}
             <Button type="submit" className="h-12 w-full rounded-full" disabled={busy || (turnstileConfigured && !turnstileToken)}>

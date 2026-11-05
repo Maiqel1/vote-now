@@ -6,6 +6,9 @@ export const RATE_KEYS = {
   resendEmail: (electionId: string, email: string) => `resend-email:${electionId}:${email.trim().toLowerCase()}`,
   vote: (electionId: string, voterId: string) => `vote:${electionId}:${voterId}`,
   receipt: (ip: string) => `receipt:${ip}`,
+  pollCreate: (ip: string) => `poll-create:${ip}`,
+  pollVote: (code: string, ip: string) => `poll-vote:${code}:${ip}`,
+  pollReport: (code: string, ip: string) => `poll-report:${code}:${ip}`,
 };
 
 export const RATE_KIND_LABELS: Record<string, string> = {
@@ -16,6 +19,9 @@ export const RATE_KIND_LABELS: Record<string, string> = {
   "resend-email": "Voting link resend (by email)",
   vote: "Vote submission",
   receipt: "Receipt check (by IP)",
+  "poll-create": "Poll creation (by IP)",
+  "poll-vote": "Poll vote (by IP)",
+  "poll-report": "Poll report (by IP)",
 };
 
 export function rateKind(key: string): string {
@@ -29,5 +35,11 @@ export function voterRateKeys(electionId: string, email: string, voterId: string
 
 export function ipRateKeys(ip: string): string[] {
   const clean = ip.trim();
-  return [RATE_KEYS.session(clean), RATE_KEYS.voterAuthIp(clean), RATE_KEYS.resendIp(clean), RATE_KEYS.receipt(clean)];
+  return [
+    RATE_KEYS.session(clean),
+    RATE_KEYS.voterAuthIp(clean),
+    RATE_KEYS.resendIp(clean),
+    RATE_KEYS.receipt(clean),
+    RATE_KEYS.pollCreate(clean),
+  ];
 }

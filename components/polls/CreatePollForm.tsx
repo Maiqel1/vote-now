@@ -156,6 +156,7 @@ export function CreatePollForm({ className }: { className?: string }) {
   const [title, setTitle] = useState("");
   const [questions, setQuestions] = useState<DraftQuestion[]>(() => [makeQuestion()]);
   const [strict, setStrict] = useState(false);
+  const [domains, setDomains] = useState("");
   const [duration, setDuration] = useState<number>(DEFAULT_POLL_DURATION);
   const [visibility, setVisibility] = useState<PollResultsVisibility>("live");
   const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
@@ -185,6 +186,7 @@ export function CreatePollForm({ className }: { className?: string }) {
         title,
         questions: questions.map(({ text, options, multi, required }) => ({ text, options, multi, required })),
         strict,
+        allowedDomains: strict ? domains : "",
         resultsVisibility: visibility,
         durationMinutes: duration,
       },
@@ -265,20 +267,37 @@ export function CreatePollForm({ className }: { className?: string }) {
       </div>
 
       {GOOGLE_ENABLED ? (
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <Label htmlFor="poll-strict" className="text-sm font-medium text-foreground">
-              Require Google sign-in
-            </Label>
-            <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
-              One vote per Google account. Without it, repeat votes from the same device or network are blocked, but a determined
-              person can sometimes get around that.
-            </p>
+        <div className="space-y-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <Label htmlFor="poll-strict" className="text-sm font-medium text-foreground">
+                Require Google sign-in
+              </Label>
+              <p className="mt-0.5 text-xs leading-relaxed text-muted-foreground">
+                Voters sign in with Google as an extra check. Best for polls where the result really matters.
+              </p>
+            </div>
+            <Switch id="poll-strict" checked={strict} onCheckedChange={setStrict} />
           </div>
-          <Switch id="poll-strict" checked={strict} onCheckedChange={setStrict} />
+          {strict && (
+            <div className="space-y-2 rounded-xl border border-border/70 bg-background/40 p-4">
+              <Label htmlFor="poll-domains">Only allow emails from (optional)</Label>
+              <Input
+                id="poll-domains"
+                value={domains}
+                maxLength={400}
+                placeholder="e.g. yourcompany.com"
+                onChange={(e) => setDomains(e.target.value)}
+              />
+              <p className="text-xs leading-relaxed text-muted-foreground">
+                Limit voting to your organization or school. Separate several with commas, or leave empty to allow any Google
+                account. Works when the organization uses Google for its email.
+              </p>
+            </div>
+          )}
         </div>
       ) : (
-        <p className="text-xs leading-relaxed text-muted-foreground">Repeat votes from the same device or network are blocked.</p>
+        <p className="text-xs leading-relaxed text-muted-foreground">Repeat and automated votes are blocked automatically.</p>
       )}
 
       <TurnstileField ref={turnstile} action="poll_create" onToken={setTurnstileToken} />

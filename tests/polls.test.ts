@@ -3,7 +3,11 @@ import { beforeAll, describe, expect, it } from "vitest";
 import {
   buildPoll,
   createPollSchema,
+  emailAllowed,
+  formatDomains,
   isDeviceId,
+  isValidDomain,
+  parseDomains,
   isFingerprint,
   isPollCode,
   networkKey,
@@ -216,7 +220,7 @@ describe("choices", () => {
 
 describe("repeat-vote keys", () => {
   const fp = "a".repeat(64);
-  const base = { code: "abcd1234", strict: false, deviceIds: ["device-aaaaaaaaaaaa"], fingerprint: fp, network: "1.2.3.4", googleSub: null };
+  const base = { code: "abcd1234", deviceIds: ["device-aaaaaaaaaaaa"], fingerprint: fp, network: "1.2.3.4", googleSub: null };
 
   it("gives the same device the same key every time", () => {
     expect(voteKeys(base)).toEqual(voteKeys({ ...base }));
@@ -240,9 +244,61 @@ describe("repeat-vote keys", () => {
     expect(other.some((k) => voteKeys(base).includes(k))).toBe(false);
   });
 
-  it("uses only the Google account in strict mode", () => {
-    expect(voteKeys({ ...base, strict: true, googleSub: "1234" })).toEqual(["abcd1234:google:1234"]);
-    expect(voteKeys({ ...base, strict: true, googleSub: null })).toEqual([]);
+  it("adds the Google account on top of the device checks, so extra accounts on one phone don't help", () => {
+    const first = voteKeys({ ...base, googleSub: "1111" });
+    const secondAccountSamePhone = voteKeys({ ...base, googleSub: "2222" });
+    expect(first).toContain("abcd1234:google:1111");
+    expect(first).toContain("abcd1234:device:device-aaaaaaaaaaaa");
+    expect(secondAccountSamePhone.some((k) => first.includes(k))).toBe(true);
+    const sameAccountOtherPhone = voteKeys({ code: "abcd1234", deviceIds: ["device-zzzzzzzzzzzz"], fingerprint: "b".repeat(64), network: "9.9.9.9", googleSub: "1111" });
+    expect(sameAccountOtherPhone.some((k) => first.includes(k))).toBe(true);
+  });
+});
+
+describe("email domain lock", () => {
+  const base = {
+    title: "",
+    questions: [question("Who should lead?", ["Ada", "Tunde"])],
+    resultsVisibility: "live",
+    durationMinutes: 60,
+  };
+
+  it("cleans up what the creator types", () => {
+    expect(parseDomains(" @Unilorin.edu.ng, student.unilorin.edu.ng;UNILORIN.EDU.NG ")).toEqual(["unilorin.edu.ng", "student.unilorin.edu.ng"]);
+    expect(parseDomains("")).toEqual([]);
+    expect(isValidDomain("company.com")).toBe(true);
+    expect(isValidDomain("not a domain")).toBe(false);
+    expect(isValidDomain("localhost")).toBe(false);
+  });
+
+  it("only keeps domains when Google sign-in is on", () => {
+    const strict = createPollSchema.parse({ ...base, strict: true, allowedDomains: "@Company.com" });
+    expect(buildPoll(strict).allowedDomains).toEqual(["company.com"]);
+    const open = createPollSchema.parse({ ...base, strict: false, allowedDomains: "" });
+    expect(buildPoll(open).allowedDomains).toEqual([]);
+    expect(buildPoll({ title: "", questions: [question("Q", ["A", "B"])] }).allowedDomains).toEqual([]);
+  });
+
+  it("rejects bad domains and too many of them", () => {
+    expect(createPollSchema.safeParse({ ...base, strict: true, allowedDomains: "company" }).success).toBe(false);
+    expect(createPollSchema.safeParse({ ...base, strict: true, allowedDomains: "a.com,b.com,c.com,d.com,e.com,f.com" }).success).toBe(false);
+    expect(createPollSchema.safeParse({ ...base, strict: true, allowedDomains: "a.com,b.com" }).success).toBe(true);
+  });
+
+  it("matches the domain and its subdomains, nothing else", () => {
+    const domains = ["unilorin.edu.ng"];
+    expect(emailAllowed("ada@unilorin.edu.ng", domains)).toBe(true);
+    expect(emailAllowed("ada@student.unilorin.edu.ng", domains)).toBe(true);
+    expect(emailAllowed("ada@gmail.com", domains)).toBe(false);
+    expect(emailAllowed("ada@fakeunilorin.edu.ng", domains)).toBe(false);
+    expect(emailAllowed("ada@unilorin.edu.ng.evil.com", domains)).toBe(false);
+    expect(emailAllowed(null, domains)).toBe(false);
+    expect(emailAllowed("anyone@gmail.com", [])).toBe(true);
+  });
+
+  it("names the domains for voters", () => {
+    expect(formatDomains(["a.com"])).toBe("@a.com");
+    expect(formatDomains(["a.com", "b.com", "c.com"])).toBe("@a.com, @b.com or @c.com");
   });
 });
 
@@ -326,7 +382,7 @@ describe("Google sign-in tokens", () => {
     const { publicKey, privateKey } = await generateKeyPair("RS256");
     keys = createLocalJWKSet({ keys: [{ ...(await exportJWK(publicKey)), kid: "k1", alg: "RS256" }] });
     sign = (opts = {}) =>
-      new SignJWT({})
+      new SignJWT({ email: "Ada@Uni.edu.ng", email_verified: true })
         .setProtectedHeader({ alg: "RS256", kid: "k1" })
         .setIssuer(opts.iss ?? "https://accounts.google.com")
         .setAudience(opts.aud ?? "client-1")
@@ -345,8 +401,8 @@ describe("Google sign-in tokens", () => {
   });
 
   it("accepts a valid token and returns the account number", async () => {
-    expect(await verifyGoogleIdToken(await sign(), "client-1", keys)).toBe("1234567890");
-    expect(await verifyGoogleIdToken(await sign({ iss: "accounts.google.com" }), "client-1", keys)).toBe("1234567890");
+    expect(await verifyGoogleIdToken(await sign(), "client-1", keys)).toEqual({ sub: "1234567890", email: "ada@uni.edu.ng", emailVerified: true });
+    expect((await verifyGoogleIdToken(await sign({ iss: "accounts.google.com" }), "client-1", keys))?.sub).toBe("1234567890");
   });
 
   it("rejects the wrong audience, issuer or an expired token", async () => {

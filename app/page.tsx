@@ -71,7 +71,7 @@ const FAQS = [
   },
   {
     q: "How do you stop people voting twice?",
-    a: "Every voting link and code works once. The server records the ballot and marks the voter as voted in a single step, so a second attempt is refused. In instant polls, repeat votes from the same device or network are blocked, and you can require Google sign-in for one vote per account.",
+    a: "Every voting link and code works once. The server records the ballot and marks the voter as voted in a single step, so a second attempt is refused. Instant polls block repeat and automated votes automatically, and you can require Google sign-in, limited to your organization's email domain if you like.",
   },
   {
     q: "Can voters check their vote was counted?",

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isFingerprint, networkKey, pollStatus, validateChoices, voteKeys } from "@/lib/polls";
+import { emailAllowed, formatDomains, isFingerprint, networkKey, pollStatus, validateChoices, voteKeys } from "@/lib/polls";
 import { RATE_KEYS } from "@/lib/rate-limit-keys";
 import { rememberDevice, resolveDevice } from "@/lib/server/device";
 import { withErrorLog } from "@/lib/server/error-log";
@@ -40,20 +40,31 @@ async function handlePost(request: Request, { params }: { params: { code: string
     return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
   }
 
+  if (!isFingerprint(body.fingerprint)) {
+    return NextResponse.json({ error: "We couldn't check this browser. Refresh the page and try again." }, { status: 400 });
+  }
+
   let googleSub: string | null = null;
   if (poll.strict) {
-    googleSub = await verifyGoogleIdToken(body.googleToken);
-    if (!googleSub) return NextResponse.json({ error: "Sign in with Google to vote in this poll.", needsGoogle: true }, { status: 401 });
-  } else if (!isFingerprint(body.fingerprint)) {
-    return NextResponse.json({ error: "We couldn't check this browser. Refresh the page and try again." }, { status: 400 });
+    const google = await verifyGoogleIdToken(body.googleToken);
+    if (!google) return NextResponse.json({ error: "Sign in with Google to vote in this poll.", needsGoogle: true }, { status: 401 });
+    if (poll.allowedDomains.length > 0 && !(google.emailVerified && emailAllowed(google.email, poll.allowedDomains))) {
+      return NextResponse.json(
+        {
+          error: `This poll only accepts ${formatDomains(poll.allowedDomains)} email addresses. Sign in with one of those accounts.`,
+          wrongDomain: true,
+        },
+        { status: 403 },
+      );
+    }
+    googleSub = google.sub;
   }
 
   const device = resolveDevice(body.deviceId);
   const keys = voteKeys({
     code: poll.code,
-    strict: poll.strict,
     deviceIds: device.ids,
-    fingerprint: isFingerprint(body.fingerprint) ? body.fingerprint : null,
+    fingerprint: body.fingerprint,
     network: networkKey(ip),
     googleSub,
   });

@@ -90,11 +90,11 @@ export default async function PollMakerPage() {
       </section>
 
       <section className="surface mt-10 rounded-2xl p-6">
-        <h2 className="mb-2 text-lg font-semibold text-foreground">How repeat votes are stopped</h2>
+        <h2 className="mb-2 text-lg font-semibold text-foreground">Keeping votes fair</h2>
         <p className="text-sm leading-relaxed text-muted-foreground">
-          Each device and network gets one vote, and a bot check stops automated voting. For polls where the result really matters,
-          turn on Google sign-in: then it&apos;s one vote per Google account. Votes are secret: nobody, including you, can see who picked
-          what.
+          VoteNow has measures in place to stop repeat voting and automated spam. For polls where the result really matters, turn on
+          Google sign-in as an extra check, and limit voting to your organization&apos;s email domain if you like. Votes are secret:
+          nobody, including you, can see who picked what.
         </p>
       </section>
 

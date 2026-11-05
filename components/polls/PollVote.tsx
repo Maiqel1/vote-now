@@ -14,7 +14,7 @@ import { reportPoll } from "@/lib/actions/polls";
 import { browserFingerprint } from "@/lib/client/fingerprint";
 import { myChoices, rememberChoices, storeDeviceId, storedDeviceId } from "@/lib/client/poll-storage";
 import { usePollResults } from "@/lib/client/use-poll-results";
-import { pollEndsAt, type PollChoices, type PollQuestion, type PollStatus, type PublicPoll } from "@/lib/polls";
+import { formatDomains, pollEndsAt, type PollChoices, type PollQuestion, type PollStatus, type PublicPoll } from "@/lib/polls";
 import { GoogleVoteButton } from "./GoogleVoteButton";
 import { PollResultsView } from "./PollResults";
 
@@ -189,7 +189,12 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
       {poll.strict ? (
         ready ? (
           <div className="space-y-2 pt-1">
-            <p className="text-center text-xs text-muted-foreground">Sign in with Google to cast your vote. We only check you haven&apos;t voted before.</p>
+            <p className="text-center text-xs text-muted-foreground">
+              {poll.allowedDomains.length > 0
+                ? `Sign in with your ${formatDomains(poll.allowedDomains)} Google account to cast your vote.`
+                : "Sign in with Google to cast your vote."}{" "}
+              Your email isn&apos;t stored or shown to anyone.
+            </p>
             {busy ? (
               <div className="flex justify-center py-2">
                 <Spinner />
@@ -238,7 +243,7 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
         <h1 className="mb-3 text-balance break-words text-3xl font-bold text-foreground md:text-4xl">{poll.title}</h1>
         <p className="text-sm text-muted-foreground">
           {subtitle}
-          {open && poll.strict && " · Google sign-in required"}
+          {open && poll.strict && (poll.allowedDomains.length > 0 ? ` · ${formatDomains(poll.allowedDomains)} Google accounts only` : " · Google sign-in required")}
         </p>
       </div>
 

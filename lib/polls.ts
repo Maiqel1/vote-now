@@ -7,6 +7,7 @@ export const POLL_LIMITS = {
   minOptions: 2,
   maxOptions: 10,
   maxQuestions: 10,
+  maxDomains: 5,
 } as const;
 export const POLL_SHARDS = 20;
 export const POLL_CODE_LENGTH = 8;
@@ -45,6 +46,7 @@ export interface Poll {
   title: string;
   questions: PollQuestion[];
   strict: boolean;
+  allowedDomains: string[];
   resultsVisibility: PollResultsVisibility;
   createdAt: number;
   endsAt: number;
@@ -77,6 +79,30 @@ const questionSchema = z.object({
   required: z.boolean(),
 });
 
+export function normalizeDomain(input: string): string {
+  return input.trim().toLowerCase().replace(/^@+/, "").replace(/^\*\./, "").replace(/\.$/, "");
+}
+
+export function isValidDomain(domain: string): boolean {
+  return /^(?=.{3,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$/.test(domain);
+}
+
+export function parseDomains(input: string): string[] {
+  return [...new Set(input.split(/[\s,;]+/).map(normalizeDomain).filter(Boolean))];
+}
+
+export function emailAllowed(email: string | null | undefined, domains: string[]): boolean {
+  if (domains.length === 0) return true;
+  const domain = email?.toLowerCase().split("@").at(-1);
+  if (!email?.includes("@") || !domain) return false;
+  return domains.some((allowed) => domain === allowed || domain.endsWith(`.${allowed}`));
+}
+
+export function formatDomains(domains: string[]): string {
+  const labels = domains.map((d) => `@${d}`);
+  return labels.length <= 1 ? labels.join("") : `${labels.slice(0, -1).join(", ")} or ${labels.at(-1)}`;
+}
+
 export const createPollSchema = z
   .object({
     title: z.string().trim().max(POLL_LIMITS.title, `Keep the title under ${POLL_LIMITS.title} characters`),
@@ -85,6 +111,7 @@ export const createPollSchema = z
       .min(1, "Add a question")
       .max(POLL_LIMITS.maxQuestions, `Up to ${POLL_LIMITS.maxQuestions} questions`),
     strict: z.boolean(),
+    allowedDomains: z.string().max(400).optional().default("").transform(parseDomains),
     resultsVisibility: z.enum(["live", "afterEnd"]),
     durationMinutes: z
       .number()
@@ -95,6 +122,18 @@ export const createPollSchema = z
     const several = value.questions.length > 1;
     if (several && !value.title) {
       ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Give your poll a title", path: ["title"] });
+    }
+    if (value.strict) {
+      const bad = value.allowedDomains.find((domain) => !isValidDomain(domain));
+      if (bad) {
+        ctx.addIssue({ code: z.ZodIssueCode.custom, message: `"${bad}" isn't a valid email domain`, path: ["allowedDomains"] });
+      } else if (value.allowedDomains.length > POLL_LIMITS.maxDomains) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Up to ${POLL_LIMITS.maxDomains} email domains`,
+          path: ["allowedDomains"],
+        });
+      }
     }
     value.questions.forEach((question, i) => {
       const prefix = several ? `Question ${i + 1}: ` : "";
@@ -113,9 +152,12 @@ export const createPollSchema = z
 export type CreatePollInput = z.input<typeof createPollSchema>;
 export type CreatePollData = z.output<typeof createPollSchema>;
 
-export function buildPoll(data: Pick<CreatePollData, "title" | "questions">): Pick<Poll, "title" | "questions"> {
+export function buildPoll(
+  data: Pick<CreatePollData, "title" | "questions"> & Partial<Pick<CreatePollData, "strict" | "allowedDomains">>,
+): Pick<Poll, "title" | "questions" | "allowedDomains"> {
   const single = data.questions.length === 1;
   return {
+    allowedDomains: data.strict ? data.allowedDomains ?? [] : [],
     title: single ? data.questions[0].text : data.title,
     questions: data.questions.map((q, i) => ({
       id: `q${i + 1}`,
@@ -204,15 +246,14 @@ export function networkKey(ip: string): string {
 
 export function voteKeys(input: {
   code: string;
-  strict: boolean;
   deviceIds: string[];
   fingerprint: string | null;
   network: string;
   googleSub: string | null;
 }): string[] {
-  if (input.strict) return input.googleSub ? [`${input.code}:google:${input.googleSub}`] : [];
   const keys = [...new Set(input.deviceIds)].map((id) => `${input.code}:device:${id}`);
   if (input.fingerprint) keys.push(`${input.code}:fp:${input.fingerprint}:${input.network}`);
+  if (input.googleSub) keys.push(`${input.code}:google:${input.googleSub}`);
   return keys;
 }
 
@@ -249,6 +290,7 @@ export function toPublicPoll(poll: Poll): PublicPoll {
     title: poll.title,
     questions: poll.questions,
     strict: poll.strict,
+    allowedDomains: poll.allowedDomains,
     resultsVisibility: poll.resultsVisibility,
     createdAt: poll.createdAt,
     endsAt: poll.endsAt,
@@ -322,6 +364,9 @@ export function toPoll(code: string, data: Record<string, unknown> | undefined):
     title: data.title,
     questions,
     strict: data.strict === true,
+    allowedDomains: Array.isArray(data.allowedDomains)
+      ? data.allowedDomains.filter((d): d is string => typeof d === "string" && isValidDomain(d))
+      : [],
     resultsVisibility: data.resultsVisibility === "afterEnd" ? "afterEnd" : "live",
     createdAt: num(data.createdAt) ?? 0,
     endsAt: num(data.endsAt) ?? 0,

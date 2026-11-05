@@ -46,6 +46,9 @@ export async function createPoll(
     const parsed = createPollSchema.safeParse(input);
     if (!parsed.success) return fail(zodMessage(parsed.error));
     if (parsed.data.strict && !googleClientId()) return fail("Google sign-in isn't available for polls yet.");
+    if (!parsed.data.strict && parsed.data.allowedDomains.length > 0) {
+      return fail("Turn on Google sign-in to limit voting to an email domain.");
+    }
 
     const ip = clientIp();
     const limit = await rateLimit(RATE_KEYS.pollCreate(ip), 10, 60 * 60 * 1000);

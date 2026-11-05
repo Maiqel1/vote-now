@@ -20,7 +20,7 @@ import { Button } from "@/components/ui/button";
 import { Spinner } from "@/components/ui/spinner";
 import { deletePoll, endPoll, getManagedPoll } from "@/lib/actions/polls";
 import { forgetPoll, savedManageKey } from "@/lib/client/poll-storage";
-import { durationLabel, pollEndsAt, type PollResultsPayload, type PublicPoll } from "@/lib/polls";
+import { durationLabel, formatDomains, pollEndsAt, type PollResultsPayload, type PublicPoll } from "@/lib/polls";
 import { PollResultsView } from "./PollResults";
 import { ShareLink } from "./ShareLink";
 
@@ -164,7 +164,11 @@ export function ManagePoll({ code }: { code: string }) {
         </div>
         <h1 className="mb-3 text-balance break-words text-3xl font-bold text-foreground md:text-4xl">{poll.title}</h1>
         <p className="text-sm text-muted-foreground">
-          {poll.questions.length > 1 ? `${poll.questions.length} questions` : poll.questions[0]?.multi ? "Multiple answers" : "One answer"} · {poll.strict ? "Google sign-in required" : "Open to anyone with the link"} · runs{" "}
+          {poll.questions.length > 1 ? `${poll.questions.length} questions` : poll.questions[0]?.multi ? "Multiple answers" : "One answer"} · {poll.strict
+            ? poll.allowedDomains.length > 0
+              ? `${formatDomains(poll.allowedDomains)} Google accounts only`
+              : "Google sign-in required"
+            : "Open to anyone with the link"} · runs{" "}
           {durationLabel(Math.round((poll.endsAt - poll.createdAt) / 60000))}
         </p>
       </div>

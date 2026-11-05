@@ -10,6 +10,7 @@ export interface AdminPollRow {
   title: string;
   status: PollStatus;
   strict: boolean;
+  domains: string[];
   hiddenResults: boolean;
   questions: number;
   options: number;
@@ -40,6 +41,7 @@ export async function listAdminPolls(limit = 300): Promise<AdminPollRow[]> {
     title: poll.title,
     status: pollStatus(poll, now),
     strict: poll.strict,
+    domains: poll.allowedDomains,
     hiddenResults: poll.resultsVisibility === "afterEnd",
     questions: poll.questions.length,
     options: poll.questions.reduce((sum, q) => sum + q.options.length, 0),

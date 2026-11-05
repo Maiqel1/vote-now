@@ -15,16 +15,13 @@ async function handleGet(request: Request, { params }: { params: { code: string 
   const url = new URL(request.url);
   const fingerprint = url.searchParams.get("f");
   const device = resolveDevice(url.searchParams.get("d"));
-  const keys = poll.strict
-    ? []
-    : voteKeys({
-        code: poll.code,
-        strict: false,
-        deviceIds: device.ids,
-        fingerprint: isFingerprint(fingerprint) ? fingerprint : null,
-        network: networkKey(clientIp()),
-        googleSub: null,
-      });
+  const keys = voteKeys({
+    code: poll.code,
+    deviceIds: device.ids,
+    fingerprint: isFingerprint(fingerprint) ? fingerprint : null,
+    network: networkKey(clientIp()),
+    googleSub: null,
+  });
   const voted = await anyVoteKeyUsed(poll.code, keys);
 
   rememberDevice(device.id);

@@ -99,7 +99,7 @@ export function PollsTable({ polls, initialQuery }: { polls: AdminPollRow[]; ini
                 <TD>
                   <div className="flex flex-wrap gap-1">
                     <Badge variant={STATUS_BADGE[p.status].variant}>{STATUS_BADGE[p.status].label}</Badge>
-                    {p.strict && <Badge variant="blue">Google</Badge>}
+                    {p.strict && <Badge variant="blue">{p.domains.length > 0 ? `Google · ${p.domains.map((d) => `@${d}`).join(", ")}` : "Google"}</Badge>}
                     {p.reportCount > 0 && <Badge variant="amber">{p.reportCount} reports</Badge>}
                   </div>
                 </TD>

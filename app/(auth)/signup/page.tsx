@@ -1,6 +1,5 @@
 "use client";
 
-import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import {
   GoogleAuthProvider,
   createUserWithEmailAndPassword,
@@ -10,15 +9,15 @@ import {
 } from "firebase/auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { AuthCard, GoogleIcon, OrDivider } from "@/components/auth/AuthCard";
-import { TurnstileField, turnstileConfigured } from "@/components/auth/TurnstileField";
+import { TurnstileField, useTurnstile } from "@/components/auth/TurnstileField";
 import { Notice } from "@/components/feedback/Notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { authErrorMessage, establishSession, safeNext } from "@/lib/client/session";
+import { authErrorMessage, establishSessionWithCheck, safeNext } from "@/lib/client/session";
 import { auth } from "@/lib/firebase";
 
 function SignupForm() {
@@ -30,14 +29,14 @@ function SignupForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState<"password" | "google" | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstile = useRef<TurnstileInstance | undefined>(undefined);
-  const blocked = turnstileConfigured && !turnstileToken;
+  const [waiting, setWaiting] = useState(false);
+  const turnstile = useTurnstile();
+  const onWaiting = () => setWaiting(true);
 
   function fail(err: unknown) {
     setError(authErrorMessage(err));
-    turnstile.current?.reset();
-    setTurnstileToken(null);
+    turnstile.check.reset();
+    setWaiting(false);
     setLoading(null);
   }
 
@@ -53,7 +52,7 @@ function SignupForm() {
       const credential = await createUserWithEmailAndPassword(auth, email.trim(), password);
       await updateProfile(credential.user, { displayName: name.trim() });
       await sendEmailVerification(credential.user, { url: `${window.location.origin}/verify-email` });
-      await establishSession(credential.user, { turnstileToken, displayName: name.trim() });
+      await establishSessionWithCheck(credential.user, turnstile.check, { displayName: name.trim(), onWaiting });
       router.replace(`/verify-email?next=${encodeURIComponent(next)}`);
       router.refresh();
     } catch (err) {
@@ -66,7 +65,7 @@ function SignupForm() {
     setLoading("google");
     try {
       const credential = await signInWithPopup(auth, new GoogleAuthProvider());
-      await establishSession(credential.user, { turnstileToken });
+      await establishSessionWithCheck(credential.user, turnstile.check, { onWaiting });
       router.replace(next);
       router.refresh();
     } catch (err) {
@@ -91,7 +90,7 @@ function SignupForm() {
         type="button"
         variant="outline"
         className="h-11 w-full"
-        disabled={loading !== null || blocked}
+        disabled={loading !== null}
         onClick={signUpWithGoogle}
       >
         {loading === "google" ? <Spinner /> : <GoogleIcon />}
@@ -123,10 +122,19 @@ function SignupForm() {
           <p className="text-xs text-muted-foreground/70">At least 8 characters.</p>
         </div>
 
-        <TurnstileField ref={turnstile} action="account" onToken={setTurnstileToken} />
+        <TurnstileField
+          ref={turnstile.ref}
+          action="account"
+          appearance="interaction-only"
+          onToken={turnstile.onToken}
+          onError={turnstile.onError}
+        />
+        {waiting && !error && (
+          <p className="text-center text-xs text-muted-foreground">Finishing a quick security check. If a box appears, tick it to continue.</p>
+        )}
         {error && <Notice tone="error">{error}</Notice>}
 
-        <Button type="submit" className="h-11 w-full" disabled={loading !== null || blocked}>
+        <Button type="submit" className="h-11 w-full" disabled={loading !== null}>
           {loading === "password" && <Spinner />}
           Create account
         </Button>

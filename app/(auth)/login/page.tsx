@@ -1,18 +1,17 @@
 "use client";
 
-import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { GoogleAuthProvider, signInWithEmailAndPassword, signInWithPopup } from "firebase/auth";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useRef, useState } from "react";
+import { Suspense, useState } from "react";
 import { AuthCard, GoogleIcon, OrDivider } from "@/components/auth/AuthCard";
-import { TurnstileField, turnstileConfigured } from "@/components/auth/TurnstileField";
+import { TurnstileField, useTurnstile } from "@/components/auth/TurnstileField";
 import { Notice } from "@/components/feedback/Notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Spinner } from "@/components/ui/spinner";
-import { authErrorMessage, establishSession, safeNext } from "@/lib/client/session";
+import { authErrorMessage, establishSessionWithCheck, safeNext } from "@/lib/client/session";
 import { auth } from "@/lib/firebase";
 
 function LoginForm() {
@@ -23,22 +22,21 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState<"password" | "google" | null>(null);
-  const [turnstileToken, setTurnstileToken] = useState<string | null>(null);
-  const turnstile = useRef<TurnstileInstance | undefined>(undefined);
-  const blocked = turnstileConfigured && !turnstileToken;
+  const [waiting, setWaiting] = useState(false);
+  const turnstile = useTurnstile();
 
   async function finish(run: () => Promise<import("firebase/auth").UserCredential>, mode: "password" | "google") {
     setError("");
     setLoading(mode);
     try {
       const credential = await run();
-      await establishSession(credential.user, { turnstileToken });
+      await establishSessionWithCheck(credential.user, turnstile.check, { onWaiting: () => setWaiting(true) });
       router.replace(next);
       router.refresh();
     } catch (err) {
       setError(authErrorMessage(err));
-      turnstile.current?.reset();
-      setTurnstileToken(null);
+      turnstile.check.reset();
+      setWaiting(false);
       setLoading(null);
     }
   }
@@ -60,7 +58,7 @@ function LoginForm() {
         type="button"
         variant="outline"
         className="h-11 w-full"
-        disabled={loading !== null || blocked}
+        disabled={loading !== null}
         onClick={() => finish(() => signInWithPopup(auth, new GoogleAuthProvider()), "google")}
       >
         {loading === "google" ? <Spinner /> : <GoogleIcon />}
@@ -97,10 +95,19 @@ function LoginForm() {
           />
         </div>
 
-        <TurnstileField ref={turnstile} action="account" onToken={setTurnstileToken} />
+        <TurnstileField
+          ref={turnstile.ref}
+          action="account"
+          appearance="interaction-only"
+          onToken={turnstile.onToken}
+          onError={turnstile.onError}
+        />
+        {waiting && !error && (
+          <p className="text-center text-xs text-muted-foreground">Finishing a quick security check. If a box appears, tick it to continue.</p>
+        )}
         {error && <Notice tone="error">{error}</Notice>}
 
-        <Button type="submit" className="h-11 w-full" disabled={loading !== null || blocked}>
+        <Button type="submit" className="h-11 w-full" disabled={loading !== null}>
           {loading === "password" && <Spinner />}
           Log in
         </Button>

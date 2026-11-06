@@ -19,8 +19,35 @@ export async function establishSession(
     }),
   });
   if (!res.ok) {
-    const data = (await res.json().catch(() => ({}))) as { error?: string };
-    throw new Error(data.error ?? "Could not sign you in");
+    const data = (await res.json().catch(() => ({}))) as { error?: string; code?: string };
+    throw new SessionError(data.error ?? "Could not sign you in", data.code);
+  }
+}
+
+export class SessionError extends Error {
+  constructor(
+    message: string,
+    readonly code?: string,
+  ) {
+    super(message);
+  }
+}
+
+export async function establishSessionWithCheck(
+  user: User,
+  check: { current: () => string | null; wait: () => Promise<string | null>; reset: () => void },
+  options: { displayName?: string; onWaiting?: () => void } = {},
+): Promise<void> {
+  const sent = check.current();
+  try {
+    await establishSession(user, { turnstileToken: sent, displayName: options.displayName });
+  } catch (err) {
+    if (!(err instanceof SessionError) || err.code !== "verify") throw err;
+    if (sent) check.reset();
+    options.onWaiting?.();
+    const token = await check.wait();
+    if (!token) throw new Error("The security check couldn't load. Refresh the page and try again.");
+    await establishSession(user, { turnstileToken: token, displayName: options.displayName });
   }
 }
 

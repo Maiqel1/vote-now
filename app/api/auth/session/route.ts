@@ -41,7 +41,7 @@ async function handlePost(request: Request) {
       return NextResponse.json({ error: "New sign-ups are paused right now. Please try again later." }, { status: 403 });
     }
     const human = await verifyTurnstile(body.turnstileToken, ip, "account");
-    if (!human) return NextResponse.json({ error: "Verification failed. Please retry the challenge." }, { status: 400 });
+    if (!human) return NextResponse.json({ error: "Verification failed. Please retry the challenge.", code: "verify" }, { status: 400 });
     await userRef.set({
       displayName: (body.displayName ?? decoded.name ?? "").toString().trim().slice(0, 80),
       email: decoded.email ?? "",

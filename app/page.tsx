@@ -129,6 +129,9 @@ export default async function Home() {
             <a href="#how" className="hidden rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block">
               How it works
             </a>
+            <Link href="/blog" className="hidden rounded-full px-3 py-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground sm:block">
+              Blog
+            </Link>
             <ThemeToggle />
             {user ? (
               <Link href="/dashboard" className={cn(buttonVariants({ size: "sm" }), "rounded-full")}>
@@ -191,7 +194,7 @@ export default async function Home() {
       <section id="how" className="relative mx-auto max-w-5xl scroll-mt-24 px-6 pb-24">
         <div className="mb-10 text-center">
           <p className="mb-2 text-sm font-medium text-brand-strong">How it works</p>
-          <h2 className="text-3xl font-semibold text-foreground md:text-4xl">From setup to results in four steps</h2>
+          <h2 className="text-3xl font-semibold text-foreground md:text-4xl">Four steps, start to finish</h2>
         </div>
         <BentoGrid>
           {STEPS.map((step) => (
@@ -254,9 +257,17 @@ export default async function Home() {
       <footer className="relative border-t border-border/70 bg-background/80">
         <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-6 py-8 text-xs text-muted-foreground">
           <Logo />
-          <a href={`mailto:${process.env.SUPPORT_EMAIL ?? "support@vote-now.xyz"}`} className="hover:text-foreground">
-            Contact &amp; abuse reports
-          </a>
+          <div className="flex flex-wrap items-center gap-4">
+            <Link href="/blog" className="hover:text-foreground">
+              Blog
+            </Link>
+            <Link href="/poll" className="hover:text-foreground">
+              Free poll maker
+            </Link>
+            <a href={`mailto:${process.env.SUPPORT_EMAIL ?? "support@vote-now.xyz"}`} className="hover:text-foreground">
+              Contact &amp; abuse reports
+            </a>
+          </div>
         </div>
       </footer>
     </main>

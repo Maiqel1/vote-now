@@ -12,18 +12,26 @@ export type TurnstileAction = "account" | "voter_sign_in" | "resend_link" | "pol
 
 export const TurnstileField = forwardRef<
   TurnstileInstance | undefined,
-  { action: TurnstileAction; onToken: (token: string | null) => void }
->(function TurnstileField({ action, onToken }, ref) {
+  {
+    action: TurnstileAction;
+    onToken: (token: string | null) => void;
+    appearance?: "always" | "interaction-only";
+    onError?: () => void;
+  }
+>(function TurnstileField({ action, onToken, appearance = "always", onError }, ref) {
   const { resolvedTheme } = useTheme();
   if (!SITE_KEY) return null;
   return (
     <Turnstile
       ref={ref}
       siteKey={SITE_KEY}
-      options={{ action, theme: resolvedTheme === "dark" ? "dark" : "light", size: "flexible" }}
+      options={{ action, appearance, theme: resolvedTheme === "dark" ? "dark" : "light", size: "flexible" }}
       onSuccess={(token) => onToken(token)}
       onExpire={() => onToken(null)}
-      onError={() => onToken(null)}
+      onError={() => {
+        onToken(null);
+        onError?.();
+      }}
     />
   );
 });

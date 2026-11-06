@@ -3,7 +3,7 @@
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import { Plus, X } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { TurnstileField, turnstileConfigured } from "@/components/auth/TurnstileField";
 import { Notice } from "@/components/feedback/Notice";
 import { Button } from "@/components/ui/button";
@@ -163,6 +163,7 @@ export function CreatePollForm({ className }: { className?: string }) {
   const turnstile = useRef<TurnstileInstance | undefined>(undefined);
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
+  const [waiting, setWaiting] = useState(false);
   const several = questions.length > 1;
 
   function updateQuestion(key: number, patch: Partial<DraftQuestion>) {
@@ -177,8 +178,23 @@ export function CreatePollForm({ className }: { className?: string }) {
     setQuestions((list) => (list.length > 1 ? list.filter((q) => q.key !== key) : list));
   }
 
-  async function submit(e: React.FormEvent) {
+  function submit(e: React.FormEvent) {
     e.preventDefault();
+    setError("");
+    if (turnstileConfigured && !turnstileToken) {
+      setWaiting(true);
+      return;
+    }
+    create();
+  }
+
+  useEffect(() => {
+    if (!waiting || !turnstileToken) return;
+    setWaiting(false);
+    create();
+  }, [waiting, turnstileToken]);
+
+  async function create() {
     setBusy(true);
     setError("");
     const result = await createPoll(
@@ -300,12 +316,21 @@ export function CreatePollForm({ className }: { className?: string }) {
         <p className="text-xs leading-relaxed text-muted-foreground">Repeat and automated votes are blocked automatically.</p>
       )}
 
-      <TurnstileField ref={turnstile} action="poll_create" onToken={setTurnstileToken} />
+      <TurnstileField
+        ref={turnstile}
+        action="poll_create"
+        appearance="interaction-only"
+        onToken={setTurnstileToken}
+        onError={() => {
+          setWaiting(false);
+          setError("The security check couldn't load. Refresh the page and try again.");
+        }}
+      />
       {error && <Notice tone="error">{error}</Notice>}
 
-      <Button type="submit" className="h-12 w-full rounded-full" disabled={busy || (turnstileConfigured && !turnstileToken)}>
-        {busy && <Spinner />}
-        Create poll
+      <Button type="submit" className="h-12 w-full rounded-full" disabled={busy || waiting}>
+        {(busy || waiting) && <Spinner />}
+        {waiting ? "Checking…" : "Create poll"}
       </Button>
       <p className="text-center text-xs text-muted-foreground">Free. No account needed. You&apos;ll get a link to share.</p>
     </form>

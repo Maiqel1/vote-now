@@ -54,6 +54,7 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
   const [error, setError] = useState("");
   const [info, setInfo] = useState("");
   const [busy, setBusy] = useState(false);
+  const [waiting, setWaiting] = useState<{ googleToken?: string } | null>(null);
   const [peek, setPeek] = useState(false);
   const [reported, setReported] = useState(false);
 
@@ -106,7 +107,6 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
   const answers = Object.fromEntries(Object.entries(selected).filter(([, value]) => value.length > 0));
   const missingRequired = poll.questions.filter((q) => q.required && !answers[q.id]).length;
   const answeredEnough = missingRequired === 0 && Object.keys(answers).length > 0;
-  const ready = answeredEnough && (!turnstileConfigured || Boolean(turnstileToken));
 
   const submit = useCallback(
     async (googleToken?: string) => {
@@ -114,8 +114,12 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
         setError(several ? "Answer the required questions first." : "Pick an option first.");
         return;
       }
-      setBusy(true);
       setError("");
+      if (turnstileConfigured && !turnstileToken) {
+        setWaiting({ googleToken });
+        return;
+      }
+      setBusy(true);
       const res = await fetch(`/api/p/${poll.code}/vote`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -155,6 +159,13 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
     [answeredEnough, several, poll.code, answers, deviceId, fingerprint, turnstileToken, refresh],
   );
 
+  useEffect(() => {
+    if (!waiting || !turnstileToken) return;
+    const queued = waiting;
+    setWaiting(null);
+    submit(queued.googleToken);
+  }, [waiting, turnstileToken, submit]);
+
   async function report() {
     const result = await reportPoll(poll.code);
     setReported(true);
@@ -184,10 +195,9 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
 
   const controls = (
     <>
-      <TurnstileField ref={turnstile} action="poll_vote" onToken={setTurnstileToken} />
       {error && <Notice tone="error">{error}</Notice>}
       {poll.strict ? (
-        ready ? (
+        answeredEnough ? (
           <div className="space-y-2 pt-1">
             <p className="text-center text-xs text-muted-foreground">
               {poll.allowedDomains.length > 0
@@ -195,9 +205,10 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
                 : "Sign in with Google to cast your vote."}{" "}
               Your email isn&apos;t stored or shown to anyone.
             </p>
-            {busy ? (
-              <div className="flex justify-center py-2">
+            {busy || waiting ? (
+              <div className="flex items-center justify-center gap-2 py-2 text-sm text-muted-foreground">
                 <Spinner />
+                {waiting ? "Checking…" : "Recording your vote…"}
               </div>
             ) : (
               <GoogleVoteButton onCredential={(token) => submit(token)} />
@@ -205,18 +216,16 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
           </div>
         ) : (
           <p className="text-center text-xs text-muted-foreground">
-            {!answeredEnough
-              ? several
-                ? "Answer the required questions, then sign in with Google to vote."
-                : "Pick an option, then sign in with Google to vote."
-              : "Complete the check above to continue."}
+            {several
+              ? "Answer the required questions, then sign in with Google to vote."
+              : "Pick an option, then sign in with Google to vote."}
           </p>
         )
       ) : (
         <>
-          <Button className="h-12 w-full rounded-full" onClick={() => submit()} disabled={busy || !ready}>
-            {busy && <Spinner />}
-            {several ? "Submit answers" : "Vote"}
+          <Button className="h-12 w-full rounded-full" onClick={() => submit()} disabled={busy || waiting !== null || !answeredEnough}>
+            {(busy || waiting) && <Spinner />}
+            {waiting ? "Checking…" : several ? "Submit answers" : "Vote"}
           </Button>
           {several && missingRequired > 0 && (
             <p className="text-center text-xs text-muted-foreground">
@@ -285,6 +294,19 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
             {controls}
           </div>
         ))}
+
+      {(phase === "checking" || phase === "voting") && (
+        <TurnstileField
+          ref={turnstile}
+          action="poll_vote"
+          appearance="interaction-only"
+          onToken={setTurnstileToken}
+          onError={() => {
+            setWaiting(null);
+            setError("The security check couldn't load. Refresh the page and try again.");
+          }}
+        />
+      )}
 
       {phase === "voted" && <Notice tone="success">{info || "Your vote is in. Thanks for taking part."}</Notice>}
 

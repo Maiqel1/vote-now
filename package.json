@@ -9,6 +9,7 @@
     "lint": "next lint",
     "audit-2025": "ts-node --project tsconfig.node.json scripts/audit-2025.ts",
     "migrate-2025": "ts-node --project tsconfig.node.json scripts/migrate-2025.ts",
+    "backfill-email-keys": "ts-node --project tsconfig.node.json scripts/backfill-email-keys.ts",
     "test": "vitest run",
     "test:rules": "firebase emulators:exec --only firestore --project demo-vote-now-rules \"vitest run --config vitest.rules.config.ts\"",
     "video": "npm --prefix video run studio"

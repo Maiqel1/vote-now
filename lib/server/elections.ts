@@ -2,6 +2,7 @@ import "server-only";
 import { adminDb } from "../firebase-admin";
 import { sumShards } from "../results";
 import type { Ballot, Election, Role, TallyShard, Voter } from "../types";
+import { voterAccessOf } from "../voter-access";
 
 export const TALLY_SHARDS = 10;
 
@@ -37,7 +38,7 @@ export function ballotsCol(electionId: string) {
 
 export function toElection(id: string, data: FirebaseFirestore.DocumentData | undefined): Election | null {
   if (!data) return null;
-  return { ...(data as Omit<Election, "id">), id };
+  return { ...(data as Omit<Election, "id">), voterAccess: voterAccessOf(data.voterAccess), id };
 }
 
 export function toVoter(id: string, data: FirebaseFirestore.DocumentData): Voter {

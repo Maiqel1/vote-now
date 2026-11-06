@@ -69,6 +69,11 @@ export function StudentUnionGuide() {
         in a single step, so a second attempt is refused. If a student loses the email, they can request their link again from
         the election page.
       </P>
+      <P>
+        For a large union, you can skip email entirely. Choose Google sign-in when you create the election, share one link, and
+        each student signs in with the Google account whose email is on your voter list. There&apos;s no voter limit in this
+        mode. <InlineLink href="/blog/how-to-run-an-election-with-unlimited-voters">Here&apos;s how it works</InlineLink>.
+      </P>
 
       <H2>Step 4: Watch turnout and send reminders</H2>
       <P>

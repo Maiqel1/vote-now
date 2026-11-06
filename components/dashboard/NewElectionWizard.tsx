@@ -13,9 +13,11 @@ import { browserTimezone, fromLocalInput, roundToNextHour, toLocalInput } from "
 import { slugify } from "@/lib/format";
 import type { ResultsVisibility } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import type { VoterAccess } from "@/lib/voter-access";
 import { VisibilityOptions } from "./VisibilityOptions";
+import { VoterAccessOptions } from "./VoterAccessOptions";
 
-const STEPS = ["Basics", "Schedule", "Results"];
+const STEPS = ["Basics", "Schedule", "Voters", "Results"];
 const DAY = 24 * 60 * 60 * 1000;
 
 export function NewElectionWizard() {
@@ -34,6 +36,7 @@ export function NewElectionWizard() {
   const [startsAt, setStartsAt] = useState(defaults.start);
   const [endsAt, setEndsAt] = useState(defaults.end);
   const [visibility, setVisibility] = useState<ResultsVisibility>("afterClose");
+  const [voterAccess, setVoterAccess] = useState<VoterAccess>("email");
   const [error, setError] = useState("");
   const [saving, setSaving] = useState(false);
   const timezone = useMemo(() => browserTimezone(), []);
@@ -100,6 +103,7 @@ export function NewElectionWizard() {
       endsAt: fromLocalInput(endsAt),
       timezone,
       visibility,
+      voterAccess,
     });
     if (!result.ok) {
       setError(result.error);
@@ -201,6 +205,16 @@ export function NewElectionWizard() {
         )}
 
         {step === 2 && (
+          <div className="space-y-3">
+            <div>
+              <h2 className="mb-1 text-xl font-bold">How will voters get in?</h2>
+              <p className="text-sm text-muted-foreground">You can change this later, up until voting opens.</p>
+            </div>
+            <VoterAccessOptions value={voterAccess} onChange={setVoterAccess} />
+          </div>
+        )}
+
+        {step === 3 && (
           <div className="space-y-3">
             <div>
               <h2 className="mb-1 text-xl font-bold">Who sees the results, and when?</h2>

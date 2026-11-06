@@ -24,7 +24,7 @@ export function TurnoutPanel({
   electionId: string;
   initialTally: TallyShard;
   voters: number;
-  invited: number;
+  invited: number | null;
   live: boolean;
 }) {
   const { tally, live: connected } = useLiveTally(electionId, initialTally, { enabled: live, requireAuth: true });
@@ -33,9 +33,9 @@ export function TurnoutPanel({
 
   return (
     <div className="space-y-4">
-      <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
+      <div className={invited === null ? "grid grid-cols-3 gap-4" : "grid grid-cols-2 gap-4 lg:grid-cols-4"}>
         <Stat label="Eligible voters" value={voters.toLocaleString()} />
-        <Stat label="Invited" value={invited.toLocaleString()} />
+        {invited !== null && <Stat label="Invited" value={invited.toLocaleString()} />}
         <Stat label="Voted" value={voted.toLocaleString()} accent />
         <Stat label="Turnout" value={`${turnout.toFixed(turnout > 0 && turnout < 10 ? 1 : 0)}%`} />
       </div>

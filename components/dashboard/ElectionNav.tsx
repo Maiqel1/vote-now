@@ -15,7 +15,7 @@ const ITEMS = [
   { href: "/settings", label: "Settings" },
 ];
 
-export function ElectionNav({ electionId }: { electionId: string }) {
+export function ElectionNav({ electionId, googleAccess = false }: { electionId: string; googleAccess?: boolean }) {
   const pathname = usePathname();
   const base = `/dashboard/e/${electionId}`;
   const [pending, setPending] = useState<string | null>(null);
@@ -25,7 +25,8 @@ export function ElectionNav({ electionId }: { electionId: string }) {
   return (
     <nav className="-mx-4 overflow-x-auto px-4 md:mx-0 md:px-0">
       <div className="flex min-w-max gap-1 border-b border-border/60">
-        {ITEMS.map((item) => {
+        {ITEMS.map((entry) => {
+          const item = googleAccess && entry.href === "/invitations" ? { ...entry, label: "Share" } : entry;
           const href = `${base}${item.href}`;
           const active = pending ? pending === href : item.href === "" ? pathname === base : pathname.startsWith(href);
           return (

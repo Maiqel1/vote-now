@@ -75,7 +75,9 @@ export default async function ElectionHomePage({ params }: { params: { slug: str
         </div>
         {(status === "open" || status === "paused" || status === "scheduled") && (
           <p className="max-w-md text-center text-xs text-muted-foreground">
-            Only people on the voter list can vote. Use the personal link or code from your invitation email.
+            {election.voterAccess === "google"
+              ? "Only people on the voter list can vote. Tap Vote now and continue with the Google account your organizer added."
+              : "Only people on the voter list can vote. Use the personal link or code from your invitation email."}
           </p>
         )}
       </div>

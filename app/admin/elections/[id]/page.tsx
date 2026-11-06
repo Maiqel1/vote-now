@@ -109,6 +109,7 @@ export default async function AdminElectionPage({ params }: { params: { id: stri
               ["Closes", formatDateTime(election.endsAt, tz)],
               ["Time zone", tz],
               ["Created", `${formatDateTime(election.createdAt, tz)} (${timeAgo(election.createdAt, now)})`],
+              ["Voters get in with", election.voterAccess === "google" ? "Google sign-in (no emails)" : "Email invitations"],
               ["Results", VISIBILITY_LABELS[election.results.visibility]],
               ["Results published", election.results.publishedAt ? formatDateTime(election.results.publishedAt, tz) : "Not yet"],
               ["Ballot locked", election.lockedAt ? formatDateTime(election.lockedAt, tz) : "No"],

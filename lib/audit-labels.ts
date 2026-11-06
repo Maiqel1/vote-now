@@ -6,6 +6,7 @@ export const AUDIT_LABELS: Record<string, string> = {
   "election.details_updated": "updated the details",
   "election.schedule_updated": "changed the schedule",
   "election.visibility_updated": "changed results visibility",
+  "election.access_changed": "changed how voters get in",
   "election.ballot_options_updated": "changed ballot options",
   "election.branding_updated": "updated branding",
   "election.published": "published the election",
@@ -55,6 +56,8 @@ export function describeAuditMeta(entry: Pick<AuditEntry, "action" | "meta">, ti
       return `to ${formatDateTime(Number(m.to), timezone)}`;
     case "election.visibility_updated":
       return String(m.visibility);
+    case "election.access_changed":
+      return m.access === "google" ? "Google sign-in" : "email invitations";
     case "team.invited":
     case "team.member_added":
       return `${m.email} as ${m.role}`;

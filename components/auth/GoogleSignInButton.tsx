@@ -32,7 +32,7 @@ function loadGoogle(): Promise<GoogleIdentity> {
   });
 }
 
-export function GoogleVoteButton({ onCredential }: { onCredential: (token: string) => void }) {
+export function GoogleSignInButton({ onCredential }: { onCredential: (token: string) => void }) {
   const container = useRef<HTMLDivElement>(null);
   const callback = useRef(onCredential);
   const [failed, setFailed] = useState(false);

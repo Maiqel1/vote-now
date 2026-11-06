@@ -175,7 +175,7 @@ export function ManagePoll({ code }: { code: string }) {
 
       <div className="surface space-y-3 rounded-2xl p-5 md:p-6">
         <div className="text-sm font-semibold text-foreground">Share your poll</div>
-        <ShareLink code={code} question={poll.title} />
+        <ShareLink path={`/p/${code}`} text={poll.title} />
       </div>
 
       {open && <Countdown target={pollEndsAt(poll)} label="Closes in" />}

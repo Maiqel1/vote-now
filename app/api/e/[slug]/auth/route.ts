@@ -32,11 +32,10 @@ async function handlePost(request: Request, { params }: { params: { slug: string
   if (!body) return NextResponse.json({ error: "Invalid request." }, { status: 400 });
 
   const ip = clientIp();
-  const ipLimit = await rateLimit(RATE_KEYS.voterAuthIp(ip), 30, 15 * 60 * 1000);
-  if (!ipLimit.ok) return NextResponse.json({ error: retryMessage(ipLimit.retryAfterMs) }, { status: 429 });
-
   let voterSnap;
   if (body.token) {
+    const linkLimit = await rateLimit(RATE_KEYS.voterLinkIp(ip), 600, 15 * 60 * 1000);
+    if (!linkLimit.ok) return NextResponse.json({ error: retryMessage(linkLimit.retryAfterMs) }, { status: 429 });
     const snap = await votersCol(election.id).where("tokenHash", "==", hashToken(body.token)).limit(1).get();
     if (snap.empty) {
       return NextResponse.json(
@@ -46,6 +45,8 @@ async function handlePost(request: Request, { params }: { params: { slug: string
     }
     voterSnap = snap.docs[0];
   } else {
+    const ipLimit = await rateLimit(RATE_KEYS.voterAuthIp(ip), 60, 15 * 60 * 1000);
+    if (!ipLimit.ok) return NextResponse.json({ error: retryMessage(ipLimit.retryAfterMs) }, { status: 429 });
     const email = String(body.email ?? "").trim().toLowerCase();
     const code = normalizeCode(String(body.code ?? ""));
     if (!email || code.length !== 8) return NextResponse.json({ error: INVALID }, { status: 400 });

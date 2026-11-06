@@ -76,7 +76,7 @@ export default async function OverviewPage({ params }: { params: { id: string } 
           electionId={election.id}
           initialTally={tally}
           voters={election.counts.voters}
-          invited={election.counts.invited}
+          invited={election.voterAccess === "google" ? null : election.counts.invited}
           live={status === "open" || status === "paused"}
         />
       </div>
@@ -101,12 +101,21 @@ export default async function OverviewPage({ params }: { params: { id: string } 
           title="Publish"
           detail={election.status === "published" ? "Published" : "Publish to allow voting"}
         />
-        <ChecklistItem
-          done={allInvited}
-          title="Invitations"
-          detail={allInvited ? "Everyone has their ballot link" : `${election.counts.invited} of ${election.counts.voters} sent`}
-          href={`${base}/invitations`}
-        />
+        {election.voterAccess === "google" ? (
+          <ChecklistItem
+            done={election.status === "published"}
+            title="Share the voting link"
+            detail={election.status === "published" ? "Your link is ready to share" : "Publish first, then share one link"}
+            href={`${base}/invitations`}
+          />
+        ) : (
+          <ChecklistItem
+            done={allInvited}
+            title="Invitations"
+            detail={allInvited ? "Everyone has their ballot link" : `${election.counts.invited} of ${election.counts.voters} sent`}
+            href={`${base}/invitations`}
+          />
+        )}
       </aside>
     </div>
   );

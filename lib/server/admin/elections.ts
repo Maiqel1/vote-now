@@ -24,6 +24,7 @@ export interface AdminElectionRow {
   voted: number;
   turnout: number;
   customLimits: boolean;
+  googleAccess: boolean;
 }
 
 export interface AdminElectionMember {
@@ -91,6 +92,7 @@ export async function listAdminElections(): Promise<AdminElectionRow[]> {
         voted: count,
         turnout: turnoutPercent(count, e.counts?.voters ?? 0),
         customLimits: isCustomPlan(resolveLimits(e.limits)),
+        googleAccess: e.voterAccess === "google",
       };
     })
     .sort((a, b) => b.createdAt - a.createdAt);
@@ -115,22 +117,26 @@ export async function getAdminElection(electionId: string): Promise<AdminElectio
   const election = toElection(snap.id, snap.data());
   if (!election) return null;
 
-  const [tally, profiles, invitesSnap, votersSnap, failedSnap, auditSnap, ownerOverrides] = await Promise.all([
+  const voters = votersCol(electionId);
+  const countOf = async (query: FirebaseFirestore.Query) => (await query.count().get()).data().count;
+  const [tally, profiles, invitesSnap, inviteCounts, failedSnap, auditSnap, ownerOverrides] = await Promise.all([
     getTally(electionId),
     memberProfiles(election.memberIds),
     adminDb().collection("teamInvites").where("electionId", "==", electionId).get(),
-    votersCol(electionId).select("invite").get(),
+    Promise.all([
+      countOf(voters.where("invite.status", "==", "notSent")),
+      countOf(voters.where("invite.status", "==", "sent")),
+      countOf(voters.where("invite.status", "==", "failed")),
+      countOf(voters.where("invite.status", "==", "printed")),
+      countOf(voters.where("invite.reminderDue", "==", true)),
+    ]),
     votersCol(electionId).where("invite.status", "==", "failed").limit(25).get(),
     electionDoc(electionId).collection("audit").orderBy("at", "desc").limit(50).get(),
     userLimitOverrides(election.ownerId),
   ]);
 
-  const inviteStats = { notSent: 0, sent: 0, failed: 0, printed: 0, reminderDue: 0 };
-  for (const doc of votersSnap.docs) {
-    const invite = (doc.data() as Pick<Voter, "invite">).invite;
-    inviteStats[invite.status] += 1;
-    if (invite.reminderDue) inviteStats.reminderDue += 1;
-  }
+  const [notSent, sent, failed, printed, reminderDue] = inviteCounts;
+  const inviteStats = { notSent, sent, failed, printed, reminderDue };
 
   const members = Object.entries(election.members)
     .map(([uid, role]) => ({ uid, role, email: profiles.get(uid)?.email ?? "", name: profiles.get(uid)?.name ?? "" }))

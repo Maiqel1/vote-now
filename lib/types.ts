@@ -1,3 +1,5 @@
+import type { VoterAccess } from "./voter-access";
+
 import type { LimitOverrides } from "./plans";
 
 export type Role = "owner" | "admin" | "observer";
@@ -49,6 +51,7 @@ export interface Election {
   lockedAt: number | null;
   reminderRound: number;
   inviteMessage: string;
+  voterAccess: VoterAccess;
   counts: { voters: number; invited: number };
   piiPurgedAt: number | null;
   limits?: LimitOverrides;
@@ -60,6 +63,7 @@ export interface Voter {
   id: string;
   email: string;
   emailLower: string;
+  emailKey?: string;
   name: string;
   tokenHash: string | null;
   codeHash: string | null;

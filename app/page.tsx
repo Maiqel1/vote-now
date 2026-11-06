@@ -36,7 +36,7 @@ const STEPS = [
   },
   {
     title: "Send secure ballots",
-    description: "Every voter gets a personal one-click link and a backup code. Print slips for anyone without email.",
+    description: "Every voter gets a personal one-click link and a backup code. Or skip email entirely: voters sign in with Google, with no voter limit.",
     icon: <Mail className="h-5 w-5" />,
   },
   {
@@ -62,8 +62,12 @@ const FAQS = [
     a: "Yes, you can start free with no credit card. Instant polls are free too, and you don't need an account to make one.",
   },
   {
+    q: "Is there a limit on how many voters I can have?",
+    a: "Not with Google sign-in. Turn it on, share one link, and anyone whose Google email is on your voter list can vote, with no emails sent and no voter limit. Elections that email every voter have a set number of voters per election.",
+  },
+  {
     q: "How do voters vote?",
-    a: "Each voter gets a personal one-click link by email, plus a backup code. They open it on any phone or computer, make their choices and submit. For voters without email, you can print voting slips with a code.",
+    a: "Each voter gets a personal one-click link by email, plus a backup code. They open it on any phone or computer, make their choices and submit. For voters without email, you can print voting slips with a code. Or skip email entirely: voters sign in with Google using the email on your voter list.",
   },
   {
     q: "Can organisers see how someone voted?",
@@ -99,6 +103,7 @@ function structuredData(): string {
         "Secret ballot",
         "One vote per voter",
         "Personal one-click voting links and backup codes",
+        "No voter limit with Google sign-in",
         "Voter list import from a spreadsheet",
         "Live turnout",
         "Voter receipts",

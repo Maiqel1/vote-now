@@ -18,6 +18,8 @@ export const FREE_PLAN: PlanLimits = {
   candidatesPerElection: 50,
 };
 
+export const GOOGLE_VOTER_CEILING = 100_000;
+
 export const LIMIT_CEILINGS: PlanLimits = {
   activeElections: 50,
   votersPerElection: 20000,
@@ -50,6 +52,11 @@ export function cleanOverrides(input: unknown): LimitOverrides {
     }
   }
   return result;
+}
+
+export function limitsForAccess(limits: PlanLimits, access: "email" | "google"): PlanLimits {
+  if (access !== "google") return limits;
+  return { ...limits, votersPerElection: Math.max(limits.votersPerElection, GOOGLE_VOTER_CEILING) };
 }
 
 export function resolveLimits(...overrides: (LimitOverrides | null | undefined)[]): PlanLimits {

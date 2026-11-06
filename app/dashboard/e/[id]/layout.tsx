@@ -40,7 +40,7 @@ export default async function ElectionLayout({ children, params }: { children: R
           </svg>
         </Link>
       </div>
-      <ElectionNav electionId={election.id} />
+      <ElectionNav electionId={election.id} googleAccess={election.voterAccess === "google"} />
       <div className="pt-8">{children}</div>
     </main>
   );

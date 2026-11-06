@@ -9,6 +9,15 @@ export interface BlogPost {
 
 export const BLOG_POSTS: BlogPost[] = [
   {
+    slug: "how-to-run-an-election-with-unlimited-voters",
+    title: "How to run an election with unlimited voters",
+    description:
+      "Skip the emails: voters sign in with Google, share one link, and there's no voter limit. A step-by-step guide for large student unions, schools and organizations.",
+    published: "2026-11-06",
+    readMinutes: 5,
+    tag: "Guide",
+  },
+  {
     slug: "state-house-medical-centre-corps-members",
     title: "How State House Medical Centre corps members run their elections online",
     description:

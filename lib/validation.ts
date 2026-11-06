@@ -32,12 +32,15 @@ export const scheduleSchema = z
 
 export const visibilitySchema = z.enum(["live", "afterClose", "manual", "private"]);
 
+export const voterAccessSchema = z.enum(["email", "google"]);
+
 export const createElectionSchema = electionDetailsSchema.extend({
   slug: slugSchema,
   startsAt: z.number().int().positive(),
   endsAt: z.number().int().positive(),
   timezone: z.string().min(1).max(64),
   visibility: visibilitySchema,
+  voterAccess: voterAccessSchema.default("email"),
 });
 
 export const ballotOptionsSchema = z.object({

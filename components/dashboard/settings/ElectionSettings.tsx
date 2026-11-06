@@ -5,6 +5,7 @@ import { useRef, useState } from "react";
 import { toast } from "sonner";
 import { ConfirmButton } from "@/components/dashboard/ConfirmButton";
 import { VisibilityOptions } from "@/components/dashboard/VisibilityOptions";
+import { VoterAccessOptions } from "@/components/dashboard/VoterAccessOptions";
 import { Notice } from "@/components/feedback/Notice";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,11 +22,13 @@ import {
   updateDetails,
   updateResultsVisibility,
   updateSchedule,
+  updateVoterAccess,
 } from "@/lib/actions/elections";
 import { fromLocalInput, toLocalInput } from "@/lib/client/datetime";
 import { uploadElectionImage } from "@/lib/client/upload";
 import { imageUrl } from "@/lib/image-url";
 import type { ActionResult, EffectiveStatus, Election, ResultsVisibility, Role } from "@/lib/types";
+import { canChangeVoterAccess, type VoterAccess } from "@/lib/voter-access";
 import { SettingsSection } from "./SettingsSection";
 
 function useSaver() {
@@ -126,6 +129,26 @@ export function ScheduleForm({ election, status, canEdit }: { election: Election
         >
           {busy && <Spinner />}
           Save schedule
+        </Button>
+      )}
+    </SettingsSection>
+  );
+}
+
+export function VoterAccessForm({ election, status, canEdit }: { election: Election; status: EffectiveStatus; canEdit: boolean }) {
+  const { busy, save } = useSaver();
+  const [value, setValue] = useState<VoterAccess>(election.voterAccess);
+  const locked = !canChangeVoterAccess(status);
+  return (
+    <SettingsSection
+      title="How voters get in"
+      description={locked ? "Locked because voting has started." : "You can change this until voting opens."}
+    >
+      <VoterAccessOptions value={value} onChange={setValue} disabled={!canEdit || locked} />
+      {canEdit && !locked && value !== election.voterAccess && (
+        <Button disabled={busy} onClick={() => save(() => updateVoterAccess(election.id, value), "Voter access saved")}>
+          {busy && <Spinner />}
+          Save
         </Button>
       )}
     </SettingsSection>

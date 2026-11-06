@@ -23,14 +23,14 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "http://localhost:3000"),
   title: { default: "VoteNow · Online voting for organizations and student unions", template: "%s · VoteNow" },
   description:
-    "Secure online voting for organizations, student unions, schools, clubs and associations. Secret ballots, one vote per voter, live turnout and instant polls. Start free.",
+    "Secure online voting for organizations, student unions, schools and clubs. Secret ballots, no voter limit with Google sign-in, live turnout. Start free.",
   applicationName: "VoteNow",
   openGraph: {
     type: "website",
     siteName: "VoteNow",
     title: "VoteNow · Online voting for organizations and student unions",
     description:
-      "Secure online voting for organizations, student unions, schools, clubs and associations. Secret ballots, one vote per voter, live turnout and instant polls.",
+      "Secure online voting for organizations, student unions, schools and clubs. Secret ballots, no voter limit with Google sign-in, live turnout and instant polls.",
   },
   twitter: { card: "summary_large_image" },
   verification: { google: "izZgC2imvgDy4tRi9AmvQtby16FpRqjR0jUdPlMXwgU" },

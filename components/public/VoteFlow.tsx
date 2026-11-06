@@ -3,6 +3,7 @@
 import type { TurnstileInstance } from "@marsidev/react-turnstile";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { TurnstileField, turnstileConfigured } from "@/components/auth/TurnstileField";
 import { BallotView, isAnswered, type DraftSelections } from "@/components/election/BallotView";
 import { Notice } from "@/components/feedback/Notice";
@@ -13,8 +14,9 @@ import { Spinner } from "@/components/ui/spinner";
 import type { Position } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { ABSTAIN } from "@/lib/validation";
+import type { VoterAccess } from "@/lib/voter-access";
 
-type Step = "token" | "code" | "resend" | "ballot" | "review" | "done" | "voted";
+type Step = "google" | "token" | "code" | "resend" | "ballot" | "review" | "done" | "voted";
 
 function shuffle<T>(items: T[]): T[] {
   const copy = [...items];
@@ -39,6 +41,7 @@ export function VoteFlow({
   requireAll,
   token,
   sessionVoter,
+  access = "email",
 }: {
   slug: string;
   title: string;
@@ -47,8 +50,10 @@ export function VoteFlow({
   requireAll: boolean;
   token: string | null;
   sessionVoter: string | null;
+  access?: VoterAccess;
 }) {
-  const [step, setStep] = useState<Step>(sessionVoter ? "ballot" : token ? "token" : "code");
+  const google = access === "google";
+  const [step, setStep] = useState<Step>(sessionVoter ? "ballot" : token ? "token" : google ? "google" : "code");
   const [voterDisplay, setVoterDisplay] = useState(sessionVoter ?? "");
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
@@ -161,6 +166,24 @@ export function VoteFlow({
     setStep("ballot");
   }
 
+  async function signInWithGoogle(googleToken: string) {
+    setBusy(true);
+    setError("");
+    const res = await post<{ voter: { display: string }; alreadyVoted?: boolean }>(`/api/e/${slug}/google`, { googleToken });
+    setBusy(false);
+    if (!res.ok) {
+      if (res.data.alreadyVoted) {
+        setInfo(res.data.error ?? "You have already voted.");
+        setStep("voted");
+        return;
+      }
+      setError(res.data.error ?? "Google sign-in didn't work. Please try again.");
+      return;
+    }
+    setVoterDisplay(res.data.voter.display);
+    setStep("ballot");
+  }
+
   async function requestLink(e: React.FormEvent) {
     e.preventDefault();
     setBusy(true);
@@ -200,6 +223,35 @@ export function VoteFlow({
 
   return (
     <div ref={topRef} className="scroll-mt-24">
+      {step === "google" && (
+        <div className="mx-auto max-w-md animate-fade-up">
+          {header("Polls open", "Sign in to vote", title)}
+          <div className="surface space-y-5 rounded-2xl p-6 md:p-8">
+            <p className="text-sm leading-relaxed text-muted-foreground">
+              Continue with the Google account whose email address is on the voter list. Your ballot is secret: the organizers can
+              see <em>that</em> you voted, never <em>how</em>.
+            </p>
+            {error && <Notice tone="error">{error}</Notice>}
+            {busy ? (
+              <div className="flex justify-center py-2">
+                <Spinner />
+              </div>
+            ) : (
+              <GoogleSignInButton onCredential={signInWithGoogle} />
+            )}
+            <button
+              className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+              onClick={() => {
+                setError("");
+                setStep("code");
+              }}
+            >
+              Have a printed voting slip? Enter your email and code
+            </button>
+          </div>
+        </div>
+      )}
+
       {step === "token" && (
         <div className="mx-auto max-w-md animate-fade-up">
           {header("Polls open", "Ready to vote?", title)}
@@ -222,7 +274,13 @@ export function VoteFlow({
 
       {step === "code" && (
         <div className="mx-auto max-w-md animate-fade-up">
-          {header("Polls open", "Verify to vote", "Enter the email you were invited with and the code from your invitation.")}
+          {header(
+            "Polls open",
+            "Verify to vote",
+            google
+              ? "Enter your email address and the code from your printed voting slip."
+              : "Enter the email you were invited with and the code from your invitation.",
+          )}
           <form
             className="surface space-y-5 rounded-2xl p-6 md:p-8"
             onSubmit={(e) => {
@@ -253,17 +311,30 @@ export function VoteFlow({
               {busy && <Spinner />}
               Verify and continue →
             </Button>
-            <button
-              type="button"
-              className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
-              onClick={() => {
-                setError("");
-                setInfo("");
-                setStep("resend");
-              }}
-            >
-              Lost your code? Email me a new link
-            </button>
+            {google ? (
+              <button
+                type="button"
+                className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setError("");
+                  setStep("google");
+                }}
+              >
+                ← Sign in with Google instead
+              </button>
+            ) : (
+              <button
+                type="button"
+                className="w-full text-center text-xs text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setError("");
+                  setInfo("");
+                  setStep("resend");
+                }}
+              >
+                Lost your code? Email me a new link
+              </button>
+            )}
           </form>
         </div>
       )}

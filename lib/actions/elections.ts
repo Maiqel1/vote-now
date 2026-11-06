@@ -22,6 +22,7 @@ import {
   scheduleSchema,
   slugSchema,
   visibilitySchema,
+  voterAccessSchema,
 } from "../validation";
 import { isAllowedImageUrl } from "../image-url";
 import { copyImageToElection } from "../server/cloudinary";
@@ -33,7 +34,10 @@ import {
   publishResultsOp,
   setPausedOp,
 } from "../server/election-ops";
-import { limitsForUser } from "../server/limits";
+import { googleClientId } from "../server/google-id";
+import { emailLimitsForElection, limitsForUser } from "../server/limits";
+import { ensureEmailKeys } from "../server/voters";
+import { emailKeyOf, voterAccessChangeProblem } from "../voter-access";
 import { ActionError, actorOf, fail, ok, requireActionUser, requireElection, run, zodMessage } from "./guard";
 
 class SlugTaken extends Error {}
@@ -75,6 +79,7 @@ export async function createElection(input: unknown): Promise<ActionResult<{ id:
     const schedule = scheduleSchema.safeParse(data);
     if (!schedule.success) return fail(zodMessage(schedule.error));
     if (RESERVED_SLUGS.has(data.slug)) return fail("That URL is reserved. Choose another.");
+    if (data.voterAccess === "google" && !googleClientId()) return fail("Google sign-in isn't available yet. Choose email invitations.");
     await assertElectionsOpen();
     await assertUnderActiveLimit(user.uid);
 
@@ -101,6 +106,7 @@ export async function createElection(input: unknown): Promise<ActionResult<{ id:
       lockedAt: null,
       reminderRound: 0,
       inviteMessage: "",
+      voterAccess: data.voterAccess,
       counts: { voters: 0, invited: 0 },
       piiPurgedAt: null,
       createdAt: now,
@@ -189,6 +195,29 @@ export async function updateResultsVisibility(electionId: string, visibility: Re
     if (election.results.publishedAt !== null) return fail("Results have already been published.");
     await electionDoc(electionId).update({ "results.visibility": parsed.data, updatedAt: Date.now() });
     await logAudit(electionId, actor, "election.visibility_updated", { visibility: parsed.data });
+    refresh(electionId);
+    return ok();
+  });
+}
+
+export async function updateVoterAccess(electionId: string, target: unknown): Promise<ActionResult> {
+  return run(async () => {
+    const { election, actor } = await requireElection(electionId, "admin");
+    const parsed = voterAccessSchema.safeParse(target);
+    if (!parsed.success) return fail("Invalid option");
+    if (parsed.data === election.voterAccess) return ok();
+    if (parsed.data === "google" && !googleClientId()) return fail("Google sign-in isn't available yet.");
+    const { votersPerElection: emailLimit } = await emailLimitsForElection(election);
+    const problem = voterAccessChangeProblem({
+      target: parsed.data,
+      status: getEffectiveStatus(election),
+      voters: election.counts.voters,
+      emailLimit,
+    });
+    if (problem) return fail(problem);
+    if (parsed.data === "google") await ensureEmailKeys(electionId);
+    await electionDoc(electionId).update({ voterAccess: parsed.data, updatedAt: Date.now() });
+    await logAudit(electionId, actor, "election.access_changed", { access: parsed.data });
     refresh(electionId);
     return ok();
   });
@@ -380,6 +409,7 @@ export async function duplicateElection(electionId: string, copyVoters: boolean)
         batch.set(votersCol(ref.id).doc(), {
           email: v.email,
           emailLower: v.emailLower,
+          emailKey: emailKeyOf(v.emailLower),
           name: v.name,
           tokenHash: null,
           codeHash: null,
@@ -402,15 +432,10 @@ export async function purgeVoterData(electionId: string): Promise<ActionResult> 
   return run(async () => {
     const { election, actor } = await requireElection(electionId, "owner");
     if (getEffectiveStatus(election) !== "closed") return fail("Voter data can only be deleted after voting closes.");
-    const db = adminDb();
-    const snap = await votersCol(electionId).get();
-    for (let i = 0; i < snap.docs.length; i += 400) {
-      const batch = db.batch();
-      snap.docs.slice(i, i + 400).forEach((d) => batch.delete(d.ref));
-      await batch.commit();
-    }
+    const count = (await votersCol(electionId).count().get()).data().count;
+    await adminDb().recursiveDelete(votersCol(electionId));
     await electionDoc(electionId).update({ piiPurgedAt: Date.now(), updatedAt: Date.now() });
-    await logAudit(electionId, actor, "voters.purged", { count: snap.size });
+    await logAudit(electionId, actor, "voters.purged", { count });
     refresh(electionId);
     return ok();
   });

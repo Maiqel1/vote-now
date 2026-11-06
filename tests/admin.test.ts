@@ -107,11 +107,14 @@ describe("rate limit keys", () => {
     expect(voterRateKeys("e1", "ada@example.com", "v1")).toEqual([
       "voter-auth-email:e1:ada@example.com",
       "resend-email:e1:ada@example.com",
+      "voter-google-email:e1:ada@example.com",
       "vote:e1:v1",
     ]);
     expect(ipRateKeys(" 1.2.3.4 ")).toEqual([
       "session:1.2.3.4",
       "voter-auth-ip:1.2.3.4",
+      "voter-link-ip:1.2.3.4",
+      "voter-google-ip:1.2.3.4",
       "resend-ip:1.2.3.4",
       "receipt:1.2.3.4",
       "poll-create:1.2.3.4",

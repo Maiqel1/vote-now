@@ -15,7 +15,7 @@ import { browserFingerprint } from "@/lib/client/fingerprint";
 import { myChoices, rememberChoices, storeDeviceId, storedDeviceId } from "@/lib/client/poll-storage";
 import { usePollResults } from "@/lib/client/use-poll-results";
 import { formatDomains, pollEndsAt, type PollChoices, type PollQuestion, type PollStatus, type PublicPoll } from "@/lib/polls";
-import { GoogleVoteButton } from "./GoogleVoteButton";
+import { GoogleSignInButton } from "@/components/auth/GoogleSignInButton";
 import { PollResultsView } from "./PollResults";
 
 type Phase = "checking" | "voting" | "voted" | "closed";
@@ -211,7 +211,7 @@ export function PollVote({ poll, status }: { poll: PublicPoll; status: PollStatu
                 {waiting ? "Checking…" : "Recording your vote…"}
               </div>
             ) : (
-              <GoogleVoteButton onCredential={(token) => submit(token)} />
+              <GoogleSignInButton onCredential={(token) => submit(token)} />
             )}
           </div>
         ) : (

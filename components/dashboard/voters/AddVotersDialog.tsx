@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -26,15 +27,26 @@ import { cn } from "@/lib/utils";
 type Mode = "single" | "paste" | "csv";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
+const CHUNK = 1000;
+const MAX_FILE_MB = 10;
 
-function Summary({ report }: { report: AddVotersReport }) {
+function Summary({ report, settingsHref }: { report: AddVotersReport; settingsHref: string | null }) {
   return (
     <div className="space-y-2">
       <Notice tone={report.added > 0 ? "success" : "warning"}>
-        Added {report.added} voter{report.added === 1 ? "" : "s"}.
-        {report.duplicates.length > 0 && ` ${report.duplicates.length} already on the list.`}
-        {report.invalid.length > 0 && ` ${report.invalid.length} invalid.`}
-        {report.overLimit > 0 && ` ${report.overLimit} not added because of the free plan's voter limit.`}
+        Added {report.added.toLocaleString()} voter{report.added === 1 ? "" : "s"}.
+        {report.duplicates.length > 0 && ` ${report.duplicates.length.toLocaleString()} already on the list.`}
+        {report.invalid.length > 0 && ` ${report.invalid.length.toLocaleString()} invalid.`}
+        {report.overLimit > 0 && ` ${report.overLimit.toLocaleString()} not added because of this election's voter limit.`}
+        {report.overLimit > 0 && settingsHref && (
+          <>
+            {" "}
+            <Link href={settingsHref} className="font-medium underline underline-offset-2">
+              Switch to Google sign-in
+            </Link>{" "}
+            for no voter limit.
+          </>
+        )}
       </Notice>
       {report.invalid.length > 0 && (
         <div className="max-h-32 overflow-y-auto rounded-xl border border-border bg-muted/50 p-3 text-xs text-muted-foreground">
@@ -49,7 +61,19 @@ function Summary({ report }: { report: AddVotersReport }) {
   );
 }
 
-export function AddVotersDialog({ electionId, disabled }: { electionId: string; disabled?: boolean }) {
+export function AddVotersDialog({
+  electionId,
+  disabled,
+  googleAccess,
+  settingsHref,
+  onAdded,
+}: {
+  electionId: string;
+  disabled?: boolean;
+  googleAccess: boolean;
+  settingsHref: string | null;
+  onAdded?: () => void;
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>("single");
@@ -60,6 +84,7 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
   const [fileName, setFileName] = useState("");
   const [mapping, setMapping] = useState<ColumnMapping>({ email: "", name: "", firstName: "", lastName: "" });
   const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState<number | null>(null);
   const [report, setReport] = useState<AddVotersReport | null>(null);
 
   const candidates: ParsedVoter[] = useMemo(() => {
@@ -80,8 +105,8 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
   }
 
   async function loadFile(file: File) {
-    if (file.size > 2 * 1024 * 1024) {
-      toast.error("That file is too large. Keep it under 2 MB.");
+    if (file.size > MAX_FILE_MB * 1024 * 1024) {
+      toast.error(`That file is too large. Keep it under ${MAX_FILE_MB} MB, or split it into smaller files.`);
       return;
     }
     const parsed = parseCsv(await file.text());
@@ -96,15 +121,38 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
 
   async function submit() {
     setBusy(true);
-    const result = await addVoters(electionId, candidates);
-    setBusy(false);
-    if (!result.ok) {
-      toast.error(result.error);
-      return;
+    setReport(null);
+    const combined: AddVotersReport = { added: 0, duplicates: [], invalid: [], overLimit: 0 };
+    let failed: string | null = null;
+    for (let start = 0; start < candidates.length; start += CHUNK) {
+      if (candidates.length > CHUNK) setProgress(start);
+      const chunk = candidates.slice(start, start + CHUNK);
+      const result = await addVoters(electionId, chunk);
+      if (!result.ok) {
+        failed = result.error;
+        break;
+      }
+      combined.added += result.data.added;
+      combined.duplicates.push(...result.data.duplicates);
+      combined.invalid.push(...result.data.invalid.map((row) => ({ ...row, row: row.row + start })));
+      combined.overLimit += result.data.overLimit;
+      if (result.data.overLimit > 0) {
+        combined.overLimit += Math.max(0, candidates.length - start - chunk.length);
+        break;
+      }
     }
-    setReport(result.data);
-    if (result.data.added > 0) router.refresh();
-    if (mode === "single" && result.data.added === 1) {
+    setBusy(false);
+    setProgress(null);
+    if (combined.added > 0) {
+      if (onAdded) onAdded();
+      else router.refresh();
+    }
+    if (failed) {
+      toast.error(combined.added > 0 ? `${failed} ${combined.added.toLocaleString()} voters were added before this.` : failed);
+      if (combined.added === 0) return;
+    }
+    setReport(combined);
+    if (mode === "single" && combined.added === 1) {
       toast.success("Voter added");
       setEmail("");
       setName("");
@@ -116,6 +164,7 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
     <Dialog
       open={open}
       onOpenChange={(v) => {
+        if (busy) return;
         setOpen(v);
         if (!v) reset();
       }}
@@ -126,7 +175,11 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
       <DialogContent className="max-h-[90vh] max-w-xl overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Add voters</DialogTitle>
-          <DialogDescription>Each voter gets a personal ballot link and code when you send invitations.</DialogDescription>
+          <DialogDescription>
+            {googleAccess
+              ? "Add the email each voter uses to sign in to Google. Only addresses on this list can vote."
+              : "Each voter gets a personal ballot link and code when you send invitations."}
+          </DialogDescription>
         </DialogHeader>
 
         <div className="grid grid-cols-3 gap-1 rounded-xl bg-secondary/50 p-1">
@@ -239,7 +292,7 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
           </div>
         )}
 
-        {report && <Summary report={report} />}
+        {report && <Summary report={report} settingsHref={settingsHref} />}
 
         <div className="flex justify-end gap-2">
           <Button variant="ghost" onClick={() => setOpen(false)}>
@@ -247,7 +300,11 @@ export function AddVotersDialog({ electionId, disabled }: { electionId: string; 
           </Button>
           <Button onClick={submit} disabled={busy || candidates.length === 0}>
             {busy && <Spinner />}
-            {mode === "single" ? "Add voter" : `Add ${candidates.length} voter${candidates.length === 1 ? "" : "s"}`}
+            {progress !== null
+              ? `Adding voters… ${progress.toLocaleString()} of ${candidates.length.toLocaleString()}`
+              : mode === "single"
+                ? "Add voter"
+                : `Add ${candidates.length.toLocaleString()} voter${candidates.length === 1 ? "" : "s"}`}
           </Button>
         </div>
       </DialogContent>

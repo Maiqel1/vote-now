@@ -37,7 +37,12 @@ export default async function VotePage({ params, searchParams }: { params: { slu
     return (
       <PublicShell election={election}>
         <StateCard eyebrow="Not open yet" title="Voting hasn't started">
-          <p className="mb-8 text-muted-foreground">Voting opens {formatDateTime(election.startsAt, election.timezone)}. Keep your invitation email; you&apos;ll need it.</p>
+          <p className="mb-8 text-muted-foreground">
+            Voting opens {formatDateTime(election.startsAt, election.timezone)}.{" "}
+            {election.voterAccess === "google"
+              ? "Come back then and continue with the Google account your organizer added to the voter list."
+              : "Keep your invitation email; you'll need it."}
+          </p>
           <Countdown target={election.startsAt} label="Opens in" />
         </StateCard>
       </PublicShell>
@@ -96,6 +101,7 @@ export default async function VotePage({ params, searchParams }: { params: { slu
         requireAll={election.ballotOptions.requireAll}
         token={typeof searchParams.t === "string" && searchParams.t.length > 10 ? searchParams.t : null}
         sessionVoter={sessionVoter}
+        access={election.voterAccess}
       />
     </PublicShell>
   );

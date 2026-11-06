@@ -9,8 +9,10 @@ import { appUrl } from "../format";
 import { logAudit } from "../server/audit";
 import { electionDoc, votersCol } from "../server/elections";
 import { limitsForElection } from "../server/limits";
+import { emailTaken, existingEmailKeys, queryVoters, VOTER_FILTERS, type VoterFilter } from "../server/voters";
+import { emailKeyOf } from "../voter-access";
 import { invitedDelta, newCredentials } from "../server/invitations";
-import type { ActionResult, Election, Voter } from "../types";
+import type { ActionResult, Election, Voter, VoterRow } from "../types";
 import { voterInputSchema } from "../validation";
 import { fail, ok, requireElection, run, zodMessage } from "./guard";
 
@@ -49,27 +51,30 @@ export async function addVoters(
     if (!Array.isArray(rows) || rows.length === 0) return fail("No voters to add.");
     if (rows.length > 1000) return fail("Import at most 1,000 rows at a time.");
 
-    const existing = await votersCol(electionId).select("emailLower").get();
-    const seen = new Set(existing.docs.map((d) => d.data().emailLower as string));
     const report: AddVotersReport = { added: 0, duplicates: [], invalid: [], overLimit: 0 };
-    const accepted: { email: string; name: string }[] = [];
-
+    const parsedRows: { email: string; name: string; key: string }[] = [];
     rows.forEach((row, index) => {
       const parsed = voterInputSchema.safeParse({ email: row?.email ?? "", name: row?.name ?? "" });
       if (!parsed.success) {
         report.invalid.push({ row: index + 1, value: String(row?.email ?? ""), reason: zodMessage(parsed.error) });
         return;
       }
-      if (seen.has(parsed.data.email)) {
-        report.duplicates.push(parsed.data.email);
-        return;
-      }
-      seen.add(parsed.data.email);
-      accepted.push(parsed.data);
+      parsedRows.push({ ...parsed.data, key: emailKeyOf(parsed.data.email) });
     });
 
+    const seen = await existingEmailKeys(electionId, parsedRows.map((row) => row.key));
+    const accepted: { email: string; name: string; key: string }[] = [];
+    for (const row of parsedRows) {
+      if (seen.has(row.key)) {
+        report.duplicates.push(row.email);
+        continue;
+      }
+      seen.add(row.key);
+      accepted.push(row);
+    }
+
     const { votersPerElection } = await limitsForElection(election);
-    const room = Math.max(0, votersPerElection - existing.size);
+    const room = Math.max(0, votersPerElection - election.counts.voters);
     const toAdd = accepted.slice(0, room);
     report.overLimit = accepted.length - toAdd.length;
 
@@ -82,6 +87,7 @@ export async function addVoters(
         batch.set(votersCol(electionId).doc(), {
           email: voter.email,
           emailLower: voter.email.toLowerCase(),
+          emailKey: voter.key,
           name: voter.name,
           tokenHash: null,
           codeHash: null,
@@ -100,6 +106,21 @@ export async function addVoters(
     if (report.added > 0) await logAudit(electionId, actor, "voters.added", { count: report.added });
     refresh(electionId);
     return ok(report);
+  });
+}
+
+export async function listVoters(
+  electionId: string,
+  options: { filter: VoterFilter; search: string; after: string | null; limit: number },
+): Promise<ActionResult<{ rows: VoterRow[]; next: string | null }>> {
+  return run(async () => {
+    const { election } = await requireElection(electionId, "observer");
+    if (election.piiPurgedAt !== null) return fail("Voter data for this election has been deleted.");
+    const filter = VOTER_FILTERS.includes(options?.filter) ? options.filter : "all";
+    const search = typeof options?.search === "string" ? options.search.slice(0, 200) : "";
+    const after = typeof options?.after === "string" ? options.after.slice(0, 320) : null;
+    const limit = Math.min(Math.max(Math.floor(Number(options?.limit) || 100), 1), 1000);
+    return ok(await queryVoters(electionId, { filter, search, after, limit }));
   });
 }
 
@@ -122,9 +143,8 @@ export async function updateVoter(
     if (voter.hasVoted) return fail("This voter has already voted and can't be edited.");
 
     const emailChanged = parsed.data.email !== voter.emailLower;
-    if (emailChanged) {
-      const clash = await votersCol(electionId).where("emailLower", "==", parsed.data.email).limit(1).get();
-      if (!clash.empty) return fail("Another voter already uses that email.");
+    if (emailChanged && (await emailTaken(electionId, parsed.data.email, voterId))) {
+      return fail("Another voter already uses that email.");
     }
 
     const batch = adminDb().batch();
@@ -134,6 +154,7 @@ export async function updateVoter(
         ? {
             email: parsed.data.email,
             emailLower: parsed.data.email,
+            emailKey: emailKeyOf(parsed.data.email),
             tokenHash: null,
             codeHash: null,
             "invite.status": "notSent",

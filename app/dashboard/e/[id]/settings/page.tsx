@@ -5,6 +5,7 @@ import {
   DetailsForm,
   ScheduleForm,
   VisibilityForm,
+  VoterAccessForm,
 } from "@/components/dashboard/settings/ElectionSettings";
 import { TeamSettings, type PendingInvite, type TeamMember } from "@/components/dashboard/settings/TeamSettings";
 import { getEffectiveStatus, isBallotLocked } from "@/lib/election-status";
@@ -45,6 +46,7 @@ export default async function SettingsPage({ params }: { params: { id: string } 
     <div className="space-y-6">
       <DetailsForm key={`d-${key}`} election={election} canEdit={canEdit} />
       <ScheduleForm key={`s-${key}`} election={election} status={status} canEdit={canEdit} />
+      <VoterAccessForm key={`a-${key}`} election={election} status={status} canEdit={canEdit} />
       <VisibilityForm key={`v-${key}`} election={election} canEdit={canEdit} />
       <BallotOptionsForm key={`b-${key}`} election={election} locked={isBallotLocked(election)} canEdit={canEdit} />
       <BrandingForm key={`br-${key}`} election={election} canEdit={canEdit} />

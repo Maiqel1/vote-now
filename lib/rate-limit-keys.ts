@@ -1,6 +1,11 @@
+import { emailKeyOf } from "./voter-access";
+
 export const RATE_KEYS = {
   session: (ip: string) => `session:${ip}`,
   voterAuthIp: (ip: string) => `voter-auth-ip:${ip}`,
+  voterLinkIp: (ip: string) => `voter-link-ip:${ip}`,
+  voterGoogleIp: (ip: string) => `voter-google-ip:${ip}`,
+  voterGoogleEmail: (electionId: string, email: string) => `voter-google-email:${electionId}:${emailKeyOf(email)}`,
   voterAuthEmail: (electionId: string, email: string) => `voter-auth-email:${electionId}:${email.trim().toLowerCase()}`,
   resendIp: (ip: string) => `resend-ip:${ip}`,
   resendEmail: (electionId: string, email: string) => `resend-email:${electionId}:${email.trim().toLowerCase()}`,
@@ -13,7 +18,10 @@ export const RATE_KEYS = {
 
 export const RATE_KIND_LABELS: Record<string, string> = {
   session: "Organiser sign-in (by IP)",
-  "voter-auth-ip": "Voter sign-in (by IP)",
+  "voter-auth-ip": "Voter sign-in with a code (by IP)",
+  "voter-link-ip": "Voter sign-in with a link (by IP)",
+  "voter-google-ip": "Voter Google sign-in (by IP)",
+  "voter-google-email": "Voter Google sign-in (by email)",
   "voter-auth-email": "Voter sign-in (by email)",
   "resend-ip": "Voting link resend (by IP)",
   "resend-email": "Voting link resend (by email)",
@@ -30,7 +38,12 @@ export function rateKind(key: string): string {
 }
 
 export function voterRateKeys(electionId: string, email: string, voterId: string): string[] {
-  return [RATE_KEYS.voterAuthEmail(electionId, email), RATE_KEYS.resendEmail(electionId, email), RATE_KEYS.vote(electionId, voterId)];
+  return [
+    RATE_KEYS.voterAuthEmail(electionId, email),
+    RATE_KEYS.resendEmail(electionId, email),
+    RATE_KEYS.voterGoogleEmail(electionId, email),
+    RATE_KEYS.vote(electionId, voterId),
+  ];
 }
 
 export function ipRateKeys(ip: string): string[] {
@@ -38,6 +51,8 @@ export function ipRateKeys(ip: string): string[] {
   return [
     RATE_KEYS.session(clean),
     RATE_KEYS.voterAuthIp(clean),
+    RATE_KEYS.voterLinkIp(clean),
+    RATE_KEYS.voterGoogleIp(clean),
     RATE_KEYS.resendIp(clean),
     RATE_KEYS.receipt(clean),
     RATE_KEYS.pollCreate(clean),

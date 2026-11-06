@@ -104,6 +104,7 @@ export function ElectionsTable({ elections, initialStatus }: { elections: AdminE
                   <div className="flex flex-wrap gap-1">
                     <StatusBadge status={e.status} />
                     {e.customLimits && <Badge variant="blue">Custom limits</Badge>}
+                    {e.googleAccess && <Badge variant="amber">Google sign-in</Badge>}
                   </div>
                 </TD>
                 <TD className="text-right tabular-nums text-muted-foreground">

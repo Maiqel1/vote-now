@@ -14,6 +14,8 @@ import { reserveEmails } from "../../server/email-quota";
 import { electionDoc, getElection, votersCol } from "../../server/elections";
 import { deliverCredentials, invitedDelta, ownerEmail } from "../../server/invitations";
 import { clearRateLimits } from "../../server/rate-limit";
+import { emailTaken } from "../../server/voters";
+import { emailKeyOf } from "../../voter-access";
 import { ActionError, fail, ok, run, zodMessage } from "../guard";
 
 async function loadVoter(electionId: string, voterId: string): Promise<{ election: Election; voter: Voter; snap: FirebaseFirestore.DocumentSnapshot }> {
@@ -62,13 +64,13 @@ export async function adminUpdateVoterEmail(electionId: string, voterId: string,
     const parsed = voterInputSchema.safeParse({ email, name: voter.name });
     if (!parsed.success) return fail(zodMessage(parsed.error));
     if (parsed.data.email === voter.emailLower) return fail("That's already their email.");
-    const clash = await votersCol(election.id).where("emailLower", "==", parsed.data.email).limit(1).get();
-    if (!clash.empty) return fail("Another voter in this election already uses that email.");
+    if (await emailTaken(election.id, parsed.data.email, voterId)) return fail("Another voter in this election already uses that email.");
 
     const batch = adminDb().batch();
     batch.update(snap.ref, {
       email: parsed.data.email,
       emailLower: parsed.data.email,
+      emailKey: emailKeyOf(parsed.data.email),
       tokenHash: null,
       codeHash: null,
       "invite.status": "notSent",

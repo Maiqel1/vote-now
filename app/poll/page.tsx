@@ -30,7 +30,7 @@ const STEPS = [
   },
   {
     title: "Share the link",
-    description: "Send it on WhatsApp, in a group chat or anywhere else. Nobody needs an account to vote.",
+    description: "Send it on WhatsApp, Slack, email, Twitter or anywhere else. Nobody needs an account to vote.",
     icon: Link2,
   },
   {

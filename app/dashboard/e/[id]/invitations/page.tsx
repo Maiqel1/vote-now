@@ -1,21 +1,39 @@
 import Link from "next/link";
 import { InvitationsPanel, type InvitationStats } from "@/components/dashboard/InvitationsPanel";
+import { SharePanel } from "@/components/dashboard/SharePanel";
 import { Notice } from "@/components/feedback/Notice";
 import { isEmailVerified } from "@/lib/auth/session";
 import { getEffectiveStatus } from "@/lib/election-status";
+import { formatDateTime } from "@/lib/format";
 import { emailsRemainingToday } from "@/lib/server/email-quota";
 import { votersCol } from "@/lib/server/elections";
 import { limitsForElection } from "@/lib/server/limits";
 import { loadElectionPage } from "@/lib/server/page";
 import type { Voter } from "@/lib/types";
 
-export const metadata = { title: "Invitations" };
+export const metadata = { title: "Invitations and sharing" };
 
 export default async function InvitationsPage({ params }: { params: { id: string } }) {
   const { election, canEdit, user } = await loadElectionPage(params.id);
 
   if (election.piiPurgedAt !== null) {
     return <Notice tone="info">Voter data for this election was deleted.</Notice>;
+  }
+
+  if (election.voterAccess === "google") {
+    return (
+      <SharePanel
+        electionId={election.id}
+        slug={election.slug}
+        title={election.title}
+        orgName={election.orgName}
+        opensAt={formatDateTime(election.startsAt, election.timezone)}
+        closesAt={formatDateTime(election.endsAt, election.timezone)}
+        published={election.status === "published"}
+        closed={getEffectiveStatus(election) === "closed"}
+        voters={election.counts.voters}
+      />
+    );
   }
 
   const [snap, verified, emailsLeftToday, limits] = await Promise.all([
